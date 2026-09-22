@@ -1,11 +1,8 @@
-// Cole aqui as configurações do seu projeto Firebase.
-// Firebase Console → ⚙️ Configurações do projeto → Seus apps → App da Web → SDK setup and configuration → Config
-// Estes valores podem ficar públicos no GitHub: a segurança vem das regras do Firestore (firestore.rules).
-export const firebaseConfig = {
-  apiKey: "COLE_AQUI",
-  authDomain: "seu-projeto.firebaseapp.com",
-  projectId: "seu-projeto",
-  storageBucket: "seu-projeto.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:0000000000000000"
+const firebaseConfig = {
+  apiKey: "AIzaSyAOeA1sPqlrUdNS1mf6130LaiRC65mPfY0",
+  authDomain: "uber-app-95609.firebaseapp.com",
+  projectId: "uber-app-95609",
+  storageBucket: "uber-app-95609.firebasestorage.app",
+  messagingSenderId: "840469675300",
+  appId: "1:840469675300:web:a230b3b1124899e6ea07b1"
 };
