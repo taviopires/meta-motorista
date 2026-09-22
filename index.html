@@ -299,6 +299,29 @@ dialog .actions .btn.danger{margin-left:auto}
 .nb-extra strong{color:var(--ink);font-weight:600}
 @media (prefers-reduced-motion:reduce){.nb-dots i{transition:none}}
 
+/* Caixinha e linha do tempo */
+.ciclo-box{margin-bottom:22px}
+.cx-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.cx-head h2{margin:0}
+.cx-saldo{display:block;font-family:var(--cond);font-size:clamp(1.9rem,8vw,2.5rem);font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:6px 0 2px}
+.cx-sub{font-size:.84rem;color:var(--muted);margin:0 0 6px}
+.cx-tl-title{font-size:1rem;margin:18px 0 2px;padding-top:14px;border-top:1px solid var(--line)}
+.tl .cob{display:block;font-size:.8rem;margin-top:3px}
+.tl .cob.ok{color:var(--good);font-weight:600}
+.tl .cob.falta{color:var(--ink)}
+.tl .cob.falta b{font-weight:700}
+.tl .quando{font-weight:600;color:var(--ink)}
+#tlMais{margin-top:6px;min-height:auto;padding:6px 0}
+
+/* Fechamento do mês */
+.fech-card{margin-bottom:16px;border:2px solid var(--ink)}
+.fech-kicker{margin:0 0 2px;font-size:.84rem;color:var(--muted);font-weight:600}
+.fech-card h2{font-size:clamp(1.5rem,6.5vw,2rem);margin:0 0 6px;font-weight:800}
+.fech-line{margin:0 0 12px;font-size:.95rem}
+.fech-bar{height:8px;background:var(--track);border-radius:999px;overflow:hidden;margin-bottom:10px}
+.fech-bar div{height:100%;background:var(--good);border-radius:999px}
+.hist-fech{margin:0 0 14px;font-size:.9rem;background:var(--surface-2);border-radius:10px;padding:10px 12px}
+
 [hidden]{display:none!important}
 </style>
 
@@ -370,6 +393,14 @@ dialog .actions .btn.danger{margin-left:auto}
 
   <!-- HOJE -->
   <section id="view-hoje" hidden>
+    <div class="panel fech-card" id="fechBox" hidden>
+      <p class="fech-kicker" id="fechKicker"></p>
+      <h2 id="fechTitle"></h2>
+      <p class="fech-line" id="fechLine"></p>
+      <div class="fech-bar"><div id="fechFill"></div></div>
+      <p class="note" id="fechStats"></p>
+      <div class="actions"><button class="btn primary" id="fechOk" type="button">Entendi</button><button class="btn ghost" id="fechHist" type="button">Ver no histórico</button></div>
+    </div>
     <div class="sign" aria-live="polite">
       <div class="sign-inner">
         <div class="sign-row">
@@ -446,9 +477,22 @@ dialog .actions .btn.danger{margin-left:auto}
       <button class="btn ghost" id="nbVer" type="button"></button>
     </div>
 
-    <div class="panel" style="margin-top:16px" id="dueBox">
-      <h2>Contas a pagar</h2>
-      <ul class="list" id="dueList"></ul>
+    <div class="panel" style="margin-top:16px" id="cxBox">
+      <div class="cx-head">
+        <h2>Caixinha das contas</h2>
+        <button class="btn ghost small" id="cxAjustar" type="button" hidden>Ajustar</button>
+      </div>
+      <div id="cxSetup" hidden>
+        <p class="note" style="margin-top:0">A caixinha acompanha o dinheiro guardado para as contas. Os ganhos entram, e as contas que você marca como pagas saem. Assim você sabe, a qualquer momento, quanto tem e quais vencimentos já estão cobertos.</p>
+        <div class="actions"><button class="btn primary" id="cxComecar" type="button">Começar caixinha</button></div>
+      </div>
+      <div id="cxInfo" hidden>
+        <b class="cx-saldo" id="cxSaldo"></b>
+        <p class="cx-sub" id="cxSub"></p>
+      </div>
+      <h3 class="cx-tl-title" id="tlTitle">Próximos vencimentos</h3>
+      <ul class="list tl" id="dueList"></ul>
+      <button class="btn linklike" id="tlMais" type="button" hidden></button>
     </div>
   </section>
 
@@ -486,6 +530,7 @@ dialog .actions .btn.danger{margin-left:auto}
 
       <div class="panel">
         <h2>Como você trabalha</h2>
+        <div id="cicloBox" class="ciclo-box"></div>
         <label id="lblDias">Dias em que você roda</label>
         <div class="chips" id="dayPresets" role="group" aria-labelledby="lblDias"></div>
         <div class="daypicks" id="dayPicks"></div>
@@ -519,9 +564,10 @@ dialog .actions .btn.danger{margin-left:auto}
       </div>
       <div class="stats three">
         <div class="stat"><small>Ganho líquido</small><b id="hGanho">R$ 0</b></div>
-        <div class="stat"><small>Meta</small><b id="hMeta">R$ 0</b></div>
+        <div class="stat"><small id="hMetaL">Meta</small><b id="hMeta">R$ 0</b></div>
         <div class="stat"><small>Resultado</small><b id="hRes">R$ 0</b></div>
       </div>
+      <p class="hist-fech" id="hFech" hidden></p>
       <div class="chart-wrap" id="chart"></div>
       <p class="hint" id="hHint">Barras: ganho líquido por dia. Linha amarela: meta diária daquele mês.</p>
     </div>
@@ -623,25 +669,28 @@ auth.languageCode = "pt";
 const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
 
 // ================= Estado =================
-const DEF_CFG = { dias:[1,2,3,4,5,6], margem:0 };
+const DEF_CFG = { dias:[1,2,3,4,5,6], margem:0, ciclo:"seguinte" };
 const LEGACY_KEY = "meta-motorista-v1";
 let uid = null, perfil = null, meses = {}, unsubs = [];
 let perfilReady = false, mesesReady = false, initingPerfil = false;
 const creating = {};
-let histY, histM, contasK, currentTab = "hoje", migrando = false;
+let histY, histM, contasK, currentTab = "hoje", migrando = false, contasInit = false;
 
 const perfilRef = () => doc(db, "usuarios", uid);
 const mesRef = k => doc(db, "usuarios", uid, "meses", k);
 const mesesCol = () => collection(db, "usuarios", uid, "meses");
 
-function normCfg(c){ const r = Object.assign(clone(DEF_CFG), c || {}); if (!Array.isArray(r.dias) || !r.dias.length) r.dias = DEF_CFG.dias.slice(); r.margem = Number(r.margem)||0; return r; }
+function normCfg(c){ const r = Object.assign(clone(DEF_CFG), c || {}); if (!Array.isArray(r.dias) || !r.dias.length) r.dias = DEF_CFG.dias.slice(); r.margem = Number(r.margem)||0; r.ciclo = r.ciclo === "mesmo" ? "mesmo" : "seguinte"; return r; }
 function normPerfil(d){
   d = d || {};
   return {
     cfg: normCfg(d.cfg),
     contasPadrao: Array.isArray(d.contasPadrao) ? d.contasPadrao : [],   // formato antigo
     defs: Array.isArray(d.defs) ? d.defs : null,                           // formato novo
-    migradoEm: typeof d.migradoEm === "string" ? d.migradoEm : null
+    migradoEm: typeof d.migradoEm === "string" ? d.migradoEm : null,
+    caixa: d.caixa && typeof d.caixa.inicio === "string" ? { inicio: d.caixa.inicio, saldoInicial: Number(d.caixa.saldoInicial) || 0 } : null,
+    fechamentoDesde: typeof d.fechamentoDesde === "string" ? d.fechamentoDesde : null,
+    fechamentoVisto: typeof d.fechamentoVisto === "string" ? d.fechamentoVisto : null
   };
 }
 function normMes(d){
@@ -690,13 +739,19 @@ function cfgDoMes(k){
   if (k < curKey() && md && md.cfg) return md.cfg;   // meses passados guardam a configuração da época
   return perfil ? perfil.cfg : normCfg();
 }
+// Mês de trabalho k: quais contas ele paga (o próprio mês ou o seguinte)
 function mesView(k){
-  return { contas: contasDoMes(k), cfg: cfgDoMes(k), ganhos: meses[k] ? meses[k].ganhos : [], virtual: !meses[k] };
+  const cfg = cfgDoMes(k), contas = contasDoMes(k);
+  const alvo = cfg.ciclo === "seguinte" ? addMonths(k, 1) : k;
+  return { contas, cfg, ganhos: meses[k] ? meses[k].ganhos : [], virtual: !meses[k], alvo, contasAlvo: alvo === k ? contas : contasDoMes(alvo) };
 }
+const cicloSeguinte = () => perfil && perfil.cfg.ciclo === "seguinte";
+const alvoDe = k => cicloSeguinte() ? addMonths(k, 1) : k;
 
 // ================= Cálculos =================
-const totalContas = md => md.contas.reduce((a,c)=>a+(Number(c.valor)||0),0);
-const metaMensal = md => totalContas(md) * (1 + (Number(md.cfg.margem)||0)/100);
+const somaContas = arr => arr.reduce((a,c)=>a+(Number(c.valor)||0),0);
+const totalContas = md => somaContas(md.contas);
+const metaMensal = md => somaContas(md.contasAlvo) * (1 + (Number(md.cfg.margem)||0)/100);
 const isWorkDay = (md,d) => md.cfg.dias.includes(d.getDay());
 const daysInMonth = (y,m) => new Date(y,m+1,0).getDate();
 function workDaysFrom(md,y,m,from){ let n=0; for(let i=from;i<=daysInMonth(y,m);i++) if(isWorkDay(md,new Date(y,m,i))) n++; return n; }
@@ -710,7 +765,7 @@ const metaSemanal = (md,y,m) => metaDiariaBase(md,y,m) * md.cfg.dias.length;
 function w(p){ p.catch(e => { console.error(e); toast("Não foi possível salvar: " + (e.code || "erro")); }); }
 function salvarDefs(defs){ w(setDoc(perfilRef(), { defs }, { merge:true })); }
 function setAjuste(k, id, val){ w(setDoc(mesRef(k), { ajustes: { [id]: val === null ? deleteField() : val } }, { merge:true })); }
-function setPaga(k, id, paga){ w(setDoc(mesRef(k), { pagas: { [id]: paga ? true : deleteField() } }, { merge:true })); }
+function setPaga(k, id, paga){ w(setDoc(mesRef(k), { pagas: { [id]: paga ? keyOf(new Date()) : deleteField() } }, { merge:true })); }
 function salvarCfg(cfg){
   w(setDoc(mesRef(curKey()), { cfg }, { merge:true }));
   w(setDoc(perfilRef(), { cfg }, { merge:true }));
@@ -774,7 +829,7 @@ $("btnSair").onclick = () => { if (confirm("Sair da sua conta neste aparelho?"))
 onAuthStateChanged(auth, user => {
   window.__mmBoot = true;
   unsubs.forEach(u => u()); unsubs = [];
-  uid = null; perfil = null; meses = {}; perfilReady = mesesReady = false; initingPerfil = false;
+  uid = null; perfil = null; meses = {}; perfilReady = mesesReady = false; initingPerfil = false; contasInit = false; migrando = false;
   if (!user){
     $("nav").hidden = true; $("btnSair").hidden = true;
     showOnly("login"); setStatus(""); return;
@@ -815,7 +870,9 @@ function initPerfil(){
 function afterLoad(){
   if (!perfilReady || !mesesReady) return;
   const k = curKey();
+  if (!contasInit){ contasInit = true; contasK = alvoDe(curKey()); }
   if (!perfil.defs && !migrando) migrar();
+  if (!perfil.fechamentoDesde && !creating.__fech){ creating.__fech = true; w(setDoc(perfilRef(), { fechamentoDesde: curKey() }, { merge:true })); }
   if (!meses[k] && !creating[k]){
     creating[k] = true;
     // merge sem "ganhos": nunca apaga lançamentos feitos em outro aparelho
@@ -849,6 +906,7 @@ function renderHoje(){
   const md = mesView(mk(y,m));
   const tKey = keyOf(now);
   const meta = metaMensal(md);
+  const seg = md.alvo !== mk(y,m), alvoNome = monthShort(md.alvo);
   const ganhoMes = md.ganhos.reduce((a,g)=>a+liquido(g),0);
   const ganhoHoje = somaDia(tKey);
   const restantes = workDaysFrom(md,y,m,today);
@@ -863,10 +921,12 @@ function renderHoje(){
 
   if (meta <= 0){
     $("signLabel").textContent = "Meta de hoje"; $("signBig").textContent = "R$ –";
-    $("signSub").textContent = "Cadastre suas contas em “Contas e metas” para calcular quanto precisa rodar.";
+    $("signSub").textContent = seg ? "Cadastre as contas de " + alvoNome + " na aba Contas para calcular quanto precisa rodar."
+      : "Cadastre suas contas na aba Contas para calcular quanto precisa rodar.";
   } else if (falta <= 0){
     $("signLabel").textContent = "Meta do mês"; $("signBig").textContent = "Batida";
-    $("signSub").textContent = "Você já cobriu todas as contas do mês. Tudo o que ganhar daqui para frente é sobra: " + fmt(ganhoMes - meta) + " até agora.";
+    $("signSub").textContent = (seg ? "Você já juntou tudo para as contas de " + alvoNome + "." : "Você já cobriu todas as contas do mês.") +
+      " O que ganhar daqui para frente é sobra: " + fmt(ganhoMes - meta) + " até agora.";
   } else if (!isWorkDay(md,now) && ganhoHoje === 0){
     $("signLabel").textContent = "Hoje é folga"; $("signBig").textContent = fmt(mediaNec);
     $("signSub").textContent = "É a média que você precisa fazer em cada um dos próximos " + restantes + " dias de trabalho. Se rodar hoje, registre e ela diminui.";
@@ -879,7 +939,8 @@ function renderHoje(){
       $("signLabel").textContent = ganhoHoje > 0 ? "Falta hoje" : "Meta de hoje";
       $("signBig").textContent = fmt(faltaHoje);
       $("signSub").textContent = ganhoHoje > 0 ? "Você já fez " + fmt(ganhoHoje) + " de " + fmt(mediaNec) + " hoje."
-        : "Líquido que você precisa fazer hoje para fechar o mês em " + fmt(meta) + ".";
+        : seg ? "Líquido que você precisa fazer hoje para juntar " + fmt(meta) + " para as contas de " + alvoNome + "."
+              : "Líquido que você precisa fazer hoje para fechar o mês em " + fmt(meta) + ".";
     }
   }
 
@@ -887,7 +948,7 @@ function renderHoje(){
   const wTotal = workDaysInMonth(md,y,m);
   const wPassed = wTotal - workDaysFrom(md,y,m,today+1);
   const esperado = wTotal ? meta * wPassed / wTotal : 0;
-  $("roadTitle").textContent = "Progresso de " + new Date(y,m,1).toLocaleDateString("pt-BR",{month:"long"});
+  $("roadTitle").textContent = seg ? cap(monthShort(mk(y,m))) + ", para as contas de " + alvoNome : "Progresso de " + monthShort(mk(y,m));
   $("roadPct").textContent = Math.round(pct) + "% da meta";
   $("roadFill").style.width = pct + "%";
   $("roadMarker").style.left = (meta > 0 ? Math.min(100, esperado/meta*100) : 0) + "%";
@@ -917,30 +978,147 @@ function renderHoje(){
   $("mNote").textContent = note;
 
   const ck = mk(y,m);
-  const pend = md.contas.filter(c => !c.paga).sort(ordemVenc);
+  const pend = md.contas.filter(c => !c.paga);
   const tudoPago = md.contas.length > 0 && pend.length === 0;
-  $("nextBox").hidden = !tudoPago;
-  if (tudoPago) renderProximo(ck, md, ganhoMes);
-  // Saldo do mês anterior (só informação, não mexe na meta)
-  const pk = addMonths(ck, -1);
-  if (meses[pk]){
-    const pmd = mesView(pk), saldoAnt = pmd.ganhos.reduce((a,g)=>a+liquido(g),0) - totalContas(pmd);
-    if (saldoAnt > 0.5 && pmd.contas.length) $("mNote").textContent = ($("mNote").textContent ? $("mNote").textContent + " " : "") +
-      "Você começou " + monthShort(ck) + " com " + fmt(saldoAnt) + " de saldo de " + monthShort(pk) + ".";
+  $("nextBox").hidden = seg || !tudoPago;
+  if (!seg && tudoPago) renderProximo(ck, md, ganhoMes);
+  if (!seg){
+    const pk = addMonths(ck, -1);
+    if (meses[pk]){
+      const pmd = mesView(pk), saldoAnt = pmd.ganhos.reduce((a,g)=>a+liquido(g),0) - totalContas(pmd);
+      if (saldoAnt > 0.5 && pmd.contas.length) $("mNote").textContent = ($("mNote").textContent ? $("mNote").textContent + " " : "") +
+        "Você começou " + monthShort(ck) + " com " + fmt(saldoAnt) + " de saldo de " + monthShort(pk) + ".";
+    }
   }
+  renderCaixa();
+  renderFechamentoCard();
+}
+
+// ================= Fechamento do mês =================
+function fechamento(pk){
+  const md = mesView(pk);
+  const ganho = md.ganhos.reduce((a,g) => a + liquido(g), 0);
+  const contasAlvo = somaContas(md.contasAlvo), seg = md.alvo !== pk;
+  const dias = new Set(md.ganhos.map(g => g.data)).size;
+  const comH = md.ganhos.filter(g => Number(g.horas) > 0), horas = comH.reduce((a,g) => a + Number(g.horas), 0);
+  const nomeAlvo = monthShort(md.alvo);
+  let line;
+  if (contasAlvo <= 0) line = "Não havia contas cadastradas para " + nomeAlvo + ".";
+  else if (ganho >= contasAlvo) line = (seg ? "Isso cobre todas as contas de " + nomeAlvo : "Você cobriu todas as contas do mês") + " (" + fmt(contasAlvo) + ") e ainda sobraram " + fmt(ganho - contasAlvo) + ".";
+  else line = (seg ? "Isso cobre " : "Isso cobriu ") + Math.round(ganho / contasAlvo * 100) + "% das contas de " + nomeAlvo + " (" + fmt(contasAlvo) + "). " + (seg ? "Faltam " : "Faltaram ") + fmt(contasAlvo - ganho) + ".";
+  const stats = dias + (dias === 1 ? " dia rodado" : " dias rodados") + (dias ? " · média de " + fmt(ganho / dias) + " por dia" : "") + (horas > 0 ? " · " + fmt2(comH.reduce((a,g)=>a+liquido(g),0) / horas) + " por hora" : "");
+  return { kicker: cap(monthShort(pk)) + " fechou", title: (seg ? "Você juntou " : "Você ganhou ") + fmt(ganho), line, stats,
+           pct: contasAlvo > 0 ? Math.min(100, ganho / contasAlvo * 100) : 0 };
+}
+function renderFechamentoCard(){
+  const pk = addMonths(curKey(), -1);
+  const show = !!(perfil.fechamentoDesde && pk >= perfil.fechamentoDesde && perfil.fechamentoVisto !== pk && meses[pk] && meses[pk].ganhos.length);
+  $("fechBox").hidden = !show;
+  if (!show) return;
+  const f = fechamento(pk), ci = caixaInfo();
+  $("fechKicker").textContent = f.kicker;
+  $("fechTitle").textContent = f.title;
+  $("fechLine").textContent = f.line;
+  $("fechFill").style.width = f.pct + "%";
+  $("fechStats").textContent = f.stats + "." + (ci ? " Sua caixinha está em " + fmt(ci.saldo) + "." : "");
+  $("fechOk").onclick = () => { w(setDoc(perfilRef(), { fechamentoVisto: pk }, { merge:true })); };
+  $("fechHist").onclick = () => { const [y,m] = pk.split("-").map(Number); histY = y; histM = m - 1; selectTab("historico"); window.scrollTo(0,0); };
+}
+
+// ================= Caixinha =================
+function caixaInfo(){
+  const cx = perfil && perfil.caixa;
+  if (!cx) return null;
+  const ini = cx.inicio;
+  let entrou = 0, saiu = 0;
+  Object.entries(meses).forEach(([k, md]) => {
+    md.ganhos.forEach(g => { if (g.data >= ini) entrou += liquido(g); });
+    const pg = md.pagas || {};
+    const ids = Object.keys(pg).filter(id => typeof pg[id] === "string" && pg[id] >= ini);
+    if (ids.length){ const cs = contasDoMes(k); ids.forEach(id => { const c = cs.find(x => x.id === id); if (c) saiu += c.valor; }); }
+  });
+  return { saldo: cx.saldoInicial + entrou - saiu, entrou, saiu, ini };
+}
+function definirCaixa(valor){
+  // Começa (ou ajusta) a caixinha para que o saldo mostrado seja exatamente "valor"
+  const ini = perfil.caixa ? perfil.caixa.inicio : keyOf(new Date());
+  const tmp = perfil.caixa; perfil.caixa = { inicio: ini, saldoInicial: 0 };
+  const base = caixaInfo().saldo; perfil.caixa = tmp;
+  w(setDoc(perfilRef(), { caixa: { inicio: ini, saldoInicial: Math.round((valor - base) * 100) / 100 } }, { merge:true }));
+}
+function abrirCaixaDialog(){
+  const ci = caixaInfo();
+  openDialog(ci ? "Ajustar caixinha" : "Começar caixinha", [
+    field("cxValor", ci ? "Quanto você tem na caixinha agora?" : "Quanto você tem guardado hoje para as contas?", ci ? numToInput(Math.round(ci.saldo*100)/100) : "", { full:true, inputmode:"decimal", placeholder:"R$ 0,00" }),
+    (() => { const d = document.createElement("p"); d.className = "full hint"; d.style.margin = "0";
+      d.textContent = ci ? "O app corrige o saldo para esse valor. Os próximos ganhos e pagamentos continuam sendo somados normalmente." : "Se não tiver nada guardado, deixe em branco. A partir de agora, os ganhos entram e as contas pagas saem."; return d; })()
+  ], () => {
+    const v = parseNum($("cxValor").value);
+    if (v < 0){ toast("Informe um valor igual ou maior que zero"); return false; }
+    definirCaixa(v); toast(ci ? "Caixinha ajustada" : "Caixinha começada");
+  });
+}
+
+function datasVenc(k, c){
+  const [y, m] = k.split("-").map(Number);
+  const dim = daysInMonth(y, m - 1);
+  return new Date(y, m - 1, Math.min(c.dia || dim, dim));
+}
+function diasTrabalhoAte(dataFim){
+  const cfg = perfil.cfg, d = new Date(); d.setHours(0,0,0,0);
+  let n = 0;
+  while (d <= dataFim){ if (cfg.dias.includes(d.getDay())) n++; d.setDate(d.getDate() + 1); }
+  return n;
+}
+let tlTudo = false;
+function renderCaixa(){
+  const ci = caixaInfo();
+  $("cxSetup").hidden = !!ci; $("cxInfo").hidden = !ci; $("cxAjustar").hidden = !ci;
+  if (ci){
+    $("cxSaldo").textContent = fmt(ci.saldo);
+    $("cxSaldo").className = "cx-saldo" + (ci.saldo < -0.5 ? " neg" : "");
+    const [iy, im, id] = ci.ini.split("-").map(Number);
+    $("cxSub").textContent = "Desde " + new Date(iy, im-1, id).toLocaleDateString("pt-BR",{day:"numeric",month:"short"}) +
+      ": entraram " + fmt(ci.entrou) + " em ganhos e saíram " + fmt(ci.saiu) + " em contas pagas.";
+  }
+
+  // Linha do tempo: contas não pagas do mês atual e do seguinte
+  const ck = curKey(), nk = addMonths(ck, 1);
+  const itens = [];
+  [ck, nk].forEach(k => contasDoMes(k).filter(c => !c.paga).forEach(c => itens.push({ c, k, data: datasVenc(k, c) })));
+  itens.sort((a,b) => a.data - b.data || b.c.valor - a.c.valor);
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  let resta = ci ? Math.max(0, ci.saldo) : 0, faltaAcum = 0;
   const ul = $("dueList"); ul.innerHTML = "";
-  $("dueBox").hidden = md.contas.length === 0 || tudoPago;
-  if (!pend.length){
+  $("tlTitle").hidden = !ci && itens.length === 0;
+  if (!itens.length){
     const li = document.createElement("li"); li.className = "empty";
-    li.textContent = "Todas as contas deste mês estão pagas.";
+    li.textContent = "Nenhum vencimento pendente neste mês nem no próximo.";
     ul.append(li);
   }
-  pend.slice(0,5).forEach(c => ul.append(contaRow(c, ck, false)));
-  if (pend.length > 5){
-    const li = document.createElement("li"); li.className = "empty";
-    li.textContent = "Mais " + (pend.length - 5) + " na aba Contas.";
-    ul.append(li);
-  }
+  const LIM = 6;
+  itens.forEach((it, i) => {
+    let extra = null;
+    if (ci){
+      extra = document.createElement("span");
+      if (resta >= it.c.valor - 0.005){
+        resta -= it.c.valor;
+        extra.className = "cob ok"; extra.textContent = "✓ Coberta pela caixinha";
+      } else {
+        faltaAcum += it.c.valor - resta; resta = 0;
+        const dias = it.data >= hoje ? diasTrabalhoAte(it.data) : 0;
+        extra.className = "cob falta";
+        const bf = document.createElement("b"); bf.textContent = "Faltam " + fmt(faltaAcum);
+        extra.append(bf);
+        if (dias > 0) extra.append(" até lá · " + fmt(faltaAcum / dias) + "/dia em " + dias + (dias === 1 ? " dia de trabalho" : " dias de trabalho"));
+        else extra.append(it.data < hoje ? " · já venceu" : " · vence hoje");
+      }
+    }
+    if (tlTudo || i < LIM) ul.append(contaRow(it.c, it.k, false, { comMes:true, extra }));
+  });
+  const mais = $("tlMais");
+  mais.hidden = itens.length <= LIM;
+  mais.textContent = tlTudo ? "Mostrar menos" : "Mostrar todos (" + itens.length + ")";
 }
 
 function renderProximo(ck, md, ganhoMes){
@@ -1024,7 +1202,7 @@ function ordemVenc(a,b){
   const da = a.dia || 99, dbb = b.dia || 99;
   return da - dbb || (b.valor - a.valor);
 }
-function vencInfo(c,k){
+function vencInfo(c,k,comMes){
   if (c.paga) return { t:"Paga", cls:"pos" };
   if (!c.dia) return { t:"Sem vencimento", cls:"" };
   const ck = curKey();
@@ -1035,9 +1213,9 @@ function vencInfo(c,k){
     if (c.dia === hoje + 1) return { t:"Vence amanhã", cls:"" };
   }
   if (k < ck) return { t:"Vencia dia " + c.dia, cls:"" };
-  return { t:"Vence dia " + c.dia, cls:"" };
+  return { t:"Vence dia " + c.dia + (comMes && k !== ck ? " de " + monthShort(k) : ""), cls:"" };
 }
-function contaRow(c, k, editavel){
+function contaRow(c, k, editavel, opts={}){
   const li = document.createElement("li"); if (c.paga) li.className = "is-paga";
   const wrap = document.createElement("div"); wrap.className = "crow";
   const pay = document.createElement("button"); pay.type = "button"; pay.className = "pay";
@@ -1054,8 +1232,9 @@ function contaRow(c, k, editavel){
   if (c.tipo === "parcelada" && c.parcelas) tag("Parcela " + c.parcela + "/" + c.parcelas);
   if (c.tipo === "unica") tag("Única");
   if (c.ajustado) tag("Ajustado");
-  const vi = vencInfo(c,k);
+  const vi = vencInfo(c,k,opts.comMes);
   const ve = document.createElement("span"); ve.className = "venc " + vi.cls; ve.textContent = vi.t; meta.append(ve);
+  if (opts.extra) meta.append(opts.extra);
   main.append(st, meta);
   const v = document.createElement("span"); v.className = "val"; v.textContent = fmt2(c.valor);
   r.append(main, v);
@@ -1078,12 +1257,22 @@ function row(title, sub, val, onEdit, label){
   li.append(r); return li;
 }
 
+// Mês de trabalho que paga as contas do mês k
+function trabalhoPara(k){
+  const w = cicloSeguinte() ? addMonths(k, -1) : k;
+  const mdw = mesView(w), [y, m] = w.split("-").map(Number);
+  const meta = somaContas(contasDoMes(k)) * (1 + (Number(mdw.cfg.margem) || 0) / 100);
+  const wd = workDaysInMonth(mdw, y, m - 1);
+  return { w, cfg: mdw.cfg, wd, meta, dia: wd ? meta / wd : 0, semana: wd ? meta / wd * mdw.cfg.dias.length : 0 };
+}
 function renderContas(){
   const k = contasK, ck = curKey();
   const [yy, mm] = k.split("-").map(Number), y = yy, m = mm - 1;
   const md = mesView(k), legado = isLegacyMonth(k);
   $("cMonth").textContent = monthLabel(k);
-  $("cHoje").hidden = k === ck;
+  const alvoAtual = alvoDe(ck);
+  $("cHoje").hidden = k === alvoAtual;
+  $("cHoje").textContent = alvoAtual === ck ? "Voltar para o mês atual" : "Voltar para " + monthShort(alvoAtual);
   $("legacyNote").hidden = !legado;
   $("addConta").hidden = legado;
 
@@ -1104,15 +1293,26 @@ function renderContas(){
   $("payFill").style.width = (total > 0 ? Math.min(100, pago/total*100) : 0) + "%";
 
   // Metas do mês
-  $("tTitle").textContent = "Quanto você precisa ganhar em " + monthShort(k);
-  $("tMes").textContent = fmt(metaMensal(md));
-  $("tSemana").textContent = fmt(metaSemanal(md,y,m));
-  $("tDia").textContent = fmt(metaDiariaBase(md,y,m));
-  $("tNote").textContent = cap(monthShort(k)) + " tem " + workDaysInMonth(md,y,m) + " dias de trabalho (" + md.cfg.dias.length + " por semana)" +
-    (md.cfg.margem ? ", com " + md.cfg.margem + "% de margem de segurança." : ".") + " Valores líquidos, depois dos gastos do dia.";
+  const tp = trabalhoPara(k);
+  $("tTitle").textContent = cicloSeguinte() ? "Para pagar as contas de " + monthShort(k) : "Quanto você precisa ganhar em " + monthShort(k);
+  $("tMes").textContent = fmt(tp.meta);
+  $("tSemana").textContent = fmt(tp.semana);
+  $("tDia").textContent = fmt(tp.dia);
+  $("tNote").textContent = (cicloSeguinte() ? "Você junta esse valor trabalhando em " + monthShort(tp.w) + ": " : cap(monthShort(k)) + " tem ") +
+    tp.wd + " dias de trabalho (" + tp.cfg.dias.length + " por semana)" +
+    (tp.cfg.margem ? ", com " + tp.cfg.margem + "% de margem de segurança." : ".") + " Valores líquidos, depois dos gastos do dia.";
 
   // Como você trabalha (configuração atual)
   const cfg = perfil.cfg;
+  const cb = $("cicloBox");
+  if (!cb.childElementCount){
+    cb.append(segField("cfgCiclo", "O que você ganha em um mês paga", [["seguinte","As contas do mês seguinte"],["mesmo","As contas do mesmo mês"]], cfg.ciclo, v => {
+      salvarCfg({ ...perfil.cfg, ciclo: v });
+      contasK = v === "seguinte" ? addMonths(curKey(), 1) : curKey();
+      toast(v === "seguinte" ? "Agora cada mês junta para as contas do mês seguinte" : "Agora cada mês paga as próprias contas");
+    }));
+  }
+  cb.querySelectorAll('input[name="cfgCiclo"]').forEach(i => { i.checked = i.value === cfg.ciclo; });
   const dp = $("dayPicks");
   if (!dp.childElementCount){
     [1,2,3,4,5,6,0].forEach(d => {
@@ -1162,6 +1362,9 @@ function renderHist(){
   const meta = metaMensal(md), res = total - meta;
   $("hGanho").textContent = fmt(total);
   $("hMeta").textContent = fmt(meta);
+  $("hMetaL").textContent = md.alvo !== k ? "Meta (contas de " + monthShort(md.alvo) + ")" : "Meta";
+  if (k < curKey() && md.ganhos.length){ const f = fechamento(k); $("hFech").textContent = f.kicker + ": " + f.title.charAt(0).toLowerCase() + f.title.slice(1) + ". " + f.line; $("hFech").hidden = false; }
+  else $("hFech").hidden = true;
   $("hRes").textContent = (res>=0?"+":"−") + fmt(Math.abs(res));
   $("hRes").className = res >= 0 ? "pos" : "neg";
   $("hHint").textContent = md.virtual && k < curKey()
@@ -1503,7 +1706,10 @@ $("quickForm").addEventListener("submit", e=>{
 $("addConta").onclick = ()=>openConta(contasK, null);
 $("cPrev").onclick = ()=>{ contasK = addMonths(contasK,-1); renderContas(); };
 $("cNext").onclick = ()=>{ contasK = addMonths(contasK, 1); renderContas(); };
-$("cHoje").onclick = ()=>{ contasK = curKey(); renderContas(); };
+$("cHoje").onclick = ()=>{ contasK = alvoDe(curKey()); renderContas(); };
+$("cxComecar").onclick = abrirCaixaDialog;
+$("cxAjustar").onclick = abrirCaixaDialog;
+$("tlMais").onclick = ()=>{ tlTudo = !tlTudo; renderCaixa(); };
 $("nbVer").onclick = ()=>{ contasK = addMonths(curKey(), 1); selectTab("contas"); renderContas(); window.scrollTo(0,0); };
 $("cfgMargem").addEventListener("change", ()=>{
   let v = parseInt($("cfgMargem").value,10); if (!(v>=0)) v = 0; if (v>100) v = 100;
