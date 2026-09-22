@@ -50,13 +50,14 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit;color:inherit}
 h1,h2,h3,h4{font-family:var(--cond);letter-spacing:-.02em}
-.wrap{max-width:960px;margin:0 auto;padding:12px 16px 112px}
+.wrap{max-width:960px;margin:0 auto;padding:12px 16px 112px;overflow-x:clip}
 
 /* Topo */
 header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 18px}
 .brand{font-family:var(--cond);font-weight:800;font-size:1.3rem;letter-spacing:-.03em}
 .userbox{display:flex;align-items:center;gap:10px}
-.status{font-size:.8rem;color:var(--muted);font-weight:500}
+.brandbox{min-width:0}
+.status{font-size:.78rem;color:var(--muted);font-weight:500;margin-top:1px}
 
 /* Navegação */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bg);border-top:1px solid var(--line);
@@ -74,16 +75,17 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 
 /* Destaque principal */
 .sign{background:var(--hero);color:var(--on-hero);border-radius:16px}
-.sign-inner{padding:22px 22px 20px}
-.sign-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sign-inner{padding:20px 18px 18px}
+@media (min-width:480px){.sign-inner{padding:24px 24px 22px}}
+.sign-row{display:flex;align-items:baseline;justify-content:space-between;gap:4px 12px;flex-wrap:wrap}
 .sign-label{font-weight:600;font-size:1rem}
 .sign-arrow{font-size:.88rem;color:var(--hero-muted)}
 .sign-big{font-family:var(--cond);font-weight:800;font-size:clamp(3rem,13vw,5.2rem);line-height:1;letter-spacing:-.04em;margin:14px 0 10px;font-variant-numeric:tabular-nums}
 .sign-sub{font-size:.95rem;color:var(--hero-muted);max-width:56ch}
 .sign hr{border:0;border-top:1px solid var(--hero-line);margin:20px 0 16px}
-.sign-split{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:end}
+.sign-split{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end}
 .sign-split small{display:block;font-size:.78rem;color:var(--hero-muted);font-weight:500;margin-bottom:2px}
-.sign-split b{font-family:var(--cond);font-size:1.3rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.sign-split b{display:block;font-family:var(--cond);font-size:clamp(1rem,4.6vw,1.3rem);font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 
 /* Progresso do mês */
 .road-block{margin:28px 0 8px}
@@ -93,27 +95,30 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .road{position:relative;height:10px;background:var(--track);border-radius:999px;overflow:visible}
 .road .fill{position:absolute;left:0;top:0;bottom:0;background:var(--fill);border-radius:999px;transition:width .6s ease}
 .road .marker{position:absolute;top:-6px;bottom:-6px;width:3px;margin-left:-1.5px;background:var(--lane);border-radius:2px}
-.road-legend{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);margin-top:12px;gap:8px;flex-wrap:wrap}
+.road-legend{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-top:12px;gap:8px;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){.road .fill{transition:none}}
 
 /* Blocos */
 .grid{display:grid;gap:16px;margin-top:24px}
 @media (min-width:860px){.grid.two{grid-template-columns:1fr 1fr}}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 16px;min-width:0}
+@media (min-width:480px){.panel{padding:20px}}
 .panel h2,.panel h3{margin:0 0 14px;font-size:1.2rem}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 14px}
+.stats.three{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:16px}
+@media (max-width:479px){.stats.three{grid-template-columns:repeat(2,minmax(0,1fr))}.stats.three .stat:last-child{grid-column:1/-1}}
 .stat small{display:block;color:var(--muted);font-size:.82rem;font-weight:500}
-.stat b{font-family:var(--cond);font-size:1.55rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat b{display:block;font-family:var(--cond);font-size:clamp(1.2rem,5.4vw,1.55rem);overflow-wrap:anywhere;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .pos{color:var(--good)} .neg{color:var(--warn)}
 .note{color:var(--muted);font-size:.9rem;margin:14px 0 0}
 
 /* Formulários */
-form .fields,.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end}
+form .fields,.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end}
 .full{grid-column:1/-1}
 label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px}
 label .opt{font-weight:400;color:var(--muted)}
 input[type=text],input[type=date],input[type=number],input[type=email],input[type=password],select{
-  width:100%;padding:12px 14px;border:2px solid transparent;border-radius:10px;background:var(--field);font-size:1rem;height:50px;transition:border-color .15s}
+  width:100%;min-width:0;max-width:100%;padding:12px 14px;border:2px solid transparent;border-radius:10px;background:var(--field);font-size:1rem;height:50px;transition:border-color .15s}
 input:focus{border-color:var(--ink);outline:none}
 input:focus-visible{outline:none}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:13px 20px;font-weight:600;cursor:pointer;min-height:50px;transition:opacity .15s,background .15s}
@@ -126,41 +131,53 @@ input:focus-visible{outline:none}
 .btn.linklike{background:none;color:var(--muted);text-decoration:underline;padding-left:4px;padding-right:4px}
 .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 #quickForm .btn.primary{width:100%}
+@media (max-width:399px){#quickForm .fields>div:nth-child(-n+2){grid-column:1/-1}}
 .hint{font-size:.83rem;color:var(--muted);margin-top:8px}
 
 /* Listas */
 .list{list-style:none;margin:0;padding:0}
-.list li{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.list li{border-bottom:1px solid var(--line)}
+.list .row{display:flex;align-items:center;gap:10px;width:100%;padding:14px 0;background:none;border:0;text-align:left;color:inherit}
+.list button.row{cursor:pointer;border-radius:8px}
+.list button.row:active{background:var(--surface-2)}
+.list .chev{color:var(--muted);font-size:1.4rem;line-height:1;flex:0 0 auto;margin-left:2px}
 .list li:last-child{border-bottom:0}
 .list .main{flex:1;min-width:0}
-.list .main strong{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list .main strong{display:block;font-weight:600;overflow-wrap:anywhere}
 .list .main span{font-size:.83rem;color:var(--muted)}
 .list .val{font-family:var(--cond);font-weight:700;font-size:1.1rem;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .empty{color:var(--muted);padding:12px 0}
+.list li.empty{border-bottom:0}
 .total-row{display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid var(--ink);padding-top:12px;margin-top:4px;font-family:var(--cond);font-weight:800;font-size:1.25rem;letter-spacing:-.02em}
 
 /* Metas */
-.targets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.targets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.targets div:first-child{grid-column:1/-1}
+@media (min-width:600px){.targets{grid-template-columns:repeat(3,minmax(0,1fr))}.targets div:first-child{grid-column:auto}}
 .targets div{padding:16px 12px;background:var(--surface-2);border-radius:12px}
 .targets div:first-child{background:var(--primary);color:var(--on-primary)}
 .targets div:first-child small{color:inherit;opacity:.7}
 .targets small{display:block;color:var(--muted);font-size:.82rem;font-weight:500}
-.targets b{font-family:var(--cond);font-size:clamp(1.15rem,5vw,1.7rem);font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.targets b{display:block;font-family:var(--cond);font-size:clamp(1.3rem,6vw,1.7rem);font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 
 /* Dias da semana */
-.daypicks{display:flex;gap:6px;flex-wrap:wrap}
 .daypicks label{margin:0}
 .daypicks input{position:absolute;opacity:0;pointer-events:none}
-.daypicks span{display:inline-block;min-width:50px;text-align:center;padding:9px 10px;border-radius:999px;font-weight:600;font-size:.9rem;cursor:pointer;background:var(--surface-2)}
+.daypicks{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.daypicks span{display:block;min-width:0;text-align:center;padding:9px 10px;border-radius:999px;font-weight:600;font-size:.9rem;cursor:pointer;background:var(--surface-2)}
 .daypicks input:checked+span{background:var(--primary);color:var(--on-primary)}
 .daypicks input:focus-visible+span{outline:3px solid var(--lane);outline-offset:2px}
 
 /* Histórico */
 .monthbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
-.monthbar h2{margin:0;font-size:1.35rem;text-transform:capitalize}
-.chart-wrap{overflow-x:auto}
-.chart-wrap svg{display:block;min-width:560px;width:100%;height:auto}
-.day-group h4{margin:18px 0 2px;font-size:.88rem;color:var(--muted);font-family:var(--font);font-weight:600;letter-spacing:0;text-transform:capitalize}
+.monthbar h2{margin:0;font-size:clamp(1.05rem,4.8vw,1.35rem);text-align:center;min-width:0}
+.monthbar .btn{flex:0 0 auto}
+.monthbar .lbl{display:none}
+@media (min-width:480px){.monthbar .lbl{display:inline}}
+.chart-wrap{width:100%}
+.chart-wrap svg{display:block;width:100%;height:auto}
+.day-group h4{margin:18px 0 2px;font-size:.88rem;color:var(--muted);font-family:var(--font);font-weight:600;letter-spacing:0}
+.day-group h4::first-letter{text-transform:uppercase}
 
 /* Diálogo */
 dialog{border:0;border-radius:18px;padding:0;width:min(520px,calc(100% - 24px));background:var(--surface);color:var(--ink)}
@@ -168,7 +185,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 dialog form{padding:22px}
 dialog h3{margin:0 0 16px;font-size:1.35rem}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--primary);color:var(--on-primary);
-  padding:12px 18px;border-radius:999px;font-weight:600;font-size:.92rem;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap}
+  padding:12px 18px;border-radius:999px;font-weight:600;font-size:.92rem;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px);width:max-content;text-align:center}
 .toast.show{opacity:1}
 @media (min-width:860px){.toast{bottom:28px}}
 
@@ -196,9 +213,11 @@ code{background:var(--surface-2);padding:1px 6px;border-radius:6px;font-size:.9e
 
 <div class="wrap">
   <header class="top">
-    <div class="brand">Meta do Motorista</div>
+    <div class="brandbox">
+      <div class="brand">Meta do Motorista</div>
+      <div class="status" id="status">Carregando…</div>
+    </div>
     <div class="userbox">
-      <span class="status" id="status">Carregando…</span>
       <button class="btn ghost small" id="btnSair" type="button" hidden>Sair</button>
     </div>
   </header>
@@ -329,7 +348,7 @@ code{background:var(--surface-2);padding:1px 6px;border-radius:6px;font-size:.9e
         <ul class="list" id="contasList"></ul>
         <div class="total-row"><span>Total</span><span id="contasTotal">R$ 0</span></div>
         <div class="actions"><button class="btn primary" id="addConta" type="button">Adicionar conta</button></div>
-        <p class="hint">Mudanças valem para este mês e os próximos. Os meses anteriores ficam como estavam no histórico.</p>
+        <p class="hint">Toque em uma conta para editar ou excluir. Mudanças valem para este mês e os próximos. Os meses anteriores ficam como estavam no histórico.</p>
       </div>
       <div class="panel">
         <h2>Como você trabalha</h2>
@@ -357,11 +376,11 @@ code{background:var(--surface-2);padding:1px 6px;border-radius:6px;font-size:.9e
   <section id="view-historico" hidden>
     <div class="panel">
       <div class="monthbar">
-        <button class="btn ghost small" id="prevMonth" type="button" aria-label="Mês anterior">‹ Anterior</button>
+        <button class="btn ghost small" id="prevMonth" type="button" aria-label="Mês anterior">‹<span class="lbl"> Anterior</span></button>
         <h2 id="histMonth"></h2>
-        <button class="btn ghost small" id="nextMonth" type="button" aria-label="Próximo mês">Próximo ›</button>
+        <button class="btn ghost small" id="nextMonth" type="button" aria-label="Próximo mês"><span class="lbl">Próximo </span>›</button>
       </div>
-      <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">
+      <div class="stats three">
         <div class="stat"><small>Ganho líquido</small><b id="hGanho">R$ 0</b></div>
         <div class="stat"><small>Meta</small><b id="hMeta">R$ 0</b></div>
         <div class="stat"><small>Resultado</small><b id="hRes">R$ 0</b></div>
@@ -371,6 +390,7 @@ code{background:var(--surface-2);padding:1px 6px;border-radius:6px;font-size:.9e
     </div>
     <div class="panel" style="margin-top:16px">
       <h2>Lançamentos</h2>
+      <p class="hint" style="margin-top:-8px">Toque em um lançamento para editar ou excluir.</p>
       <div id="histList"></div>
     </div>
   </section>
@@ -700,17 +720,16 @@ function renderHoje(){
 
 function row(title, sub, val, onEdit, label){
   const li = document.createElement("li");
+  const r = document.createElement(onEdit ? "button" : "div"); r.className = "row";
+  if (onEdit){ r.type = "button"; r.onclick = onEdit; r.setAttribute("aria-label", "Editar " + (label || title) + ", " + val); }
   const main = document.createElement("div"); main.className="main";
-  const s = document.createElement("strong"); s.textContent = title;
-  const sp = document.createElement("span"); sp.textContent = sub;
-  main.append(s,sp);
+  const s1 = document.createElement("strong"); s1.textContent = title;
+  const s2 = document.createElement("span"); s2.textContent = sub;
+  main.append(s1,s2);
   const v = document.createElement("span"); v.className="val"; v.textContent = val;
-  li.append(main,v);
-  if (onEdit){
-    const b = document.createElement("button"); b.className="btn ghost small"; b.type="button"; b.textContent="Editar";
-    b.setAttribute("aria-label", "Editar " + (label || title)); b.onclick = onEdit; li.append(b);
-  }
-  return li;
+  r.append(main,v);
+  if (onEdit){ const c = document.createElement("span"); c.className="chev"; c.setAttribute("aria-hidden","true"); c.textContent = "›"; r.append(c); }
+  li.append(r); return li;
 }
 
 function renderContas(){
@@ -753,7 +772,7 @@ function renderContas(){
 
 function renderHist(){
   const y = histY, m = histM, k = mk(y,m), md = mesView(k);
-  $("histMonth").textContent = monthName(y,m);
+  { const mn = monthName(y,m); $("histMonth").textContent = mn.charAt(0).toUpperCase() + mn.slice(1); }
   const total = md.ganhos.reduce((a,g)=>a+liquido(g),0);
   const meta = metaMensal(md), res = total - meta;
   $("hGanho").textContent = fmt(total);
@@ -764,7 +783,9 @@ function renderHist(){
     ? "Nenhum dado salvo neste mês. A meta mostrada usa as contas atuais."
     : "Barras: ganho líquido por dia. Linha amarela: meta diária daquele mês.";
 
-  const n = daysInMonth(y,m), W = 720, H = 220, pl = 44, pr = 8, pt = 12, pb = 26;
+  const cw = $("chart").clientWidth;
+  const n = daysInMonth(y,m), W = Math.round(cw > 0 ? cw : 720), H = W < 480 ? 180 : 220, pl = W < 480 ? 36 : 44, pr = 4, pt = 12, pb = 24;
+  const lblEvery = W < 380 ? 7 : 5;
   const vals = []; for(let i=1;i<=n;i++) vals.push(somaDia(k+"-"+pad(i)));
   const mdb = metaDiariaBase(md,y,m);
   const max = Math.max(mdb*1.25, ...vals, 10);
@@ -773,7 +794,7 @@ function renderHist(){
   const css = getComputedStyle(document.documentElement);
   const cv = n => css.getPropertyValue(n).trim();
   const [cInk,cBar,cLane,cLine,cGood] = ["--muted","--sign","--lane","--line","--good"].map(cv);
-  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ganhos por dia em ${monthName(y,m)}">`;
+  let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ganhos por dia em ${monthName(y,m)}">`;
   [0,.5,1].forEach(f=>{
     const v = max*f, yy = yOf(v);
     svg += `<line x1="${pl}" x2="${W-pr}" y1="${yy}" y2="${yy}" stroke="${cLine}"/>`;
@@ -787,7 +808,7 @@ function renderHist(){
     } else if (!isWorkDay(md,d)){
       svg += `<rect x="${x.toFixed(1)}" y="${H-pb-3}" width="${wd.toFixed(1)}" height="3" fill="${cLine}"/>`;
     }
-    if (i===0 || (i+1)%5===0) svg += `<text x="${(pl+i*bw+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="11" fill="${cInk}" font-family="Inter,sans-serif">${i+1}</text>`;
+    if (i===0 || (i+1)%lblEvery===0) svg += `<text x="${(pl+i*bw+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="11" fill="${cInk}" font-family="Inter,sans-serif">${i+1}</text>`;
   });
   if (mdb > 0) svg += `<line x1="${pl}" x2="${W-pr}" y1="${yOf(mdb)}" y2="${yOf(mdb)}" stroke="${cLane}" stroke-width="2" stroke-dasharray="6 5"/>`;
   $("chart").innerHTML = svg + `</svg>`;
@@ -891,6 +912,7 @@ function selectTab(v){
   currentTab = v;
   document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected", x.dataset.view===v ? "true":"false"));
   showOnly(v);
+  if (v === "historico" && perfil) renderHist();
   try { sessionStorage.setItem("mm-tab", v); } catch(e){}
 }
 document.querySelectorAll("nav.tabs button").forEach(b=> b.onclick = ()=>{ selectTab(b.dataset.view); window.scrollTo(0,0); });
@@ -940,6 +962,8 @@ $("importFile").onchange = e=>{
   r.readAsText(f);
 };
 
+let lastW = window.innerWidth, rT;
+window.addEventListener("resize", ()=>{ clearTimeout(rT); rT = setTimeout(()=>{ if (window.innerWidth !== lastW){ lastW = window.innerWidth; if (perfil && !$("view-historico").hidden) renderHist(); } }, 200); });
 window.addEventListener("online", ()=>setStatus("Sincronizando…"));
 window.addEventListener("offline", ()=>setStatus("Sem internet, salvo no aparelho"));
 document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) renderAll(); });
