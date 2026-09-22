@@ -269,6 +269,24 @@ dialog .actions .btn.danger{margin-left:auto}
 .mpick-grid button[aria-pressed="true"]{background:var(--primary);color:var(--on-primary);box-shadow:none}
 .mpick-grid button:focus-visible,.mpick-head button:focus-visible{outline:3px solid var(--lane);outline-offset:1px}
 
+/* Cartão do próximo mês */
+.next-card{border-color:var(--good)}
+.nb-head{display:flex;gap:12px;align-items:flex-start}
+.nb-head h2{margin:0 0 2px}
+.nb-head .note{margin:0}
+.nb-check{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:var(--good);color:#fff;display:grid;place-items:center;margin-top:2px}
+.nb-saldo{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:20px 0 4px;flex-wrap:wrap}
+.nb-saldo span{font-size:.9rem;color:var(--muted);font-weight:500}
+.nb-saldo b{font-family:var(--cond);font-size:clamp(1.8rem,8vw,2.4rem);font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.nb-dots{display:grid;grid-template-columns:repeat(var(--cols,14),minmax(0,1fr));gap:5px;margin:12px 0 12px;max-width:520px}
+.nb-dots i{display:block;aspect-ratio:1;border-radius:50%;background:var(--track);transition:background .35s}
+.nb-dots i.on{background:var(--good)}
+.nb-legend{font-size:.88rem;margin:0 0 14px;color:var(--ink)}
+.nb-row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.86rem;color:var(--muted);padding-top:12px;border-top:1px solid var(--line);margin-bottom:14px}
+.nb-row strong{color:var(--ink);font-weight:600}
+#nbVer{width:100%}
+@media (prefers-reduced-motion:reduce){.nb-dots i{transition:none}}
+
 [hidden]{display:none!important}
 </style>
 
@@ -394,6 +412,18 @@ dialog .actions .btn.danger{margin-left:auto}
         </div>
         <p class="note" id="mNote"></p>
       </div>
+    </div>
+
+    <div class="panel next-card" style="margin-top:16px" id="nextBox" hidden>
+      <div class="nb-head">
+        <span class="nb-check" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h2 id="nbTitle"></h2><p class="note" id="nbSub"></p></div>
+      </div>
+      <div class="nb-saldo"><span id="nbLabel"></span><b id="nbValor"></b></div>
+      <div class="nb-dots" id="nbDots" role="img"></div>
+      <p class="nb-legend" id="nbLegend"></p>
+      <div class="nb-row" id="nbRow"><span>Contas de <span id="nbMes"></span>: <strong id="nbContas"></strong></span><span id="nbFalta"></span></div>
+      <button class="btn ghost" id="nbVer" type="button"></button>
     </div>
 
     <div class="panel" style="margin-top:16px" id="dueBox">
@@ -868,8 +898,18 @@ function renderHoje(){
 
   const ck = mk(y,m);
   const pend = md.contas.filter(c => !c.paga).sort(ordemVenc);
+  const tudoPago = md.contas.length > 0 && pend.length === 0;
+  $("nextBox").hidden = !tudoPago;
+  if (tudoPago) renderProximo(ck, md, ganhoMes);
+  // Saldo do mês anterior (só informação, não mexe na meta)
+  const pk = addMonths(ck, -1);
+  if (meses[pk]){
+    const pmd = mesView(pk), saldoAnt = pmd.ganhos.reduce((a,g)=>a+liquido(g),0) - totalContas(pmd);
+    if (saldoAnt > 0.5 && pmd.contas.length) $("mNote").textContent = ($("mNote").textContent ? $("mNote").textContent + " " : "") +
+      "Você começou " + monthShort(ck) + " com " + fmt(saldoAnt) + " de saldo de " + monthShort(pk) + ".";
+  }
   const ul = $("dueList"); ul.innerHTML = "";
-  $("dueBox").hidden = md.contas.length === 0;
+  $("dueBox").hidden = md.contas.length === 0 || tudoPago;
   if (!pend.length){
     const li = document.createElement("li"); li.className = "empty";
     li.textContent = "Todas as contas deste mês estão pagas.";
@@ -880,6 +920,42 @@ function renderHoje(){
     const li = document.createElement("li"); li.className = "empty";
     li.textContent = "Mais " + (pend.length - 5) + " na aba Contas.";
     ul.append(li);
+  }
+}
+
+function renderProximo(ck, md, ganhoMes){
+  const nk = addMonths(ck, 1), nmd = mesView(nk);
+  const [ny, nm] = nk.split("-").map(Number);
+  const nome = monthShort(nk);
+  const saldo = Math.max(0, ganhoMes - totalContas(md));
+  const totN = totalContas(nmd), wd = workDaysInMonth(nmd, ny, nm - 1);
+
+  $("nbTitle").textContent = cap(monthShort(ck)) + " está pago";
+  $("nbSub").textContent = "O que você ganhar a partir de agora já conta para " + nome + ".";
+  $("nbLabel").textContent = "Saldo para " + nome;
+  $("nbValor").textContent = (saldo > 0.5 ? "+" : "") + fmt(saldo);
+  $("nbValor").className = saldo > 0.5 ? "pos" : "";
+  $("nbMes").textContent = nome;
+
+  const dots = $("nbDots"); dots.innerHTML = "";
+  if (totN > 0 && wd > 0){
+    const porDia = totN / wd;
+    const cob = Math.min(wd, Math.floor(saldo / porDia + 1e-9));
+    dots.style.setProperty("--cols", Math.ceil(wd / 2));
+    for (let i = 0; i < wd; i++){ const d = document.createElement("i"); if (i < cob) d.className = "on"; dots.append(d); }
+    dots.hidden = false;
+    dots.setAttribute("aria-label", cob + " de " + wd + " dias de trabalho de " + nome + " cobertos pelo saldo");
+    $("nbLegend").textContent = cob >= wd ? "Seu saldo já cobre todas as contas de " + nome + "."
+      : cob === 0 ? "Cada ponto é um dia de trabalho de " + nome + ", que custa cerca de " + fmt(porDia) + " em contas. Eles ficam verdes conforme seu saldo cresce."
+      : cob + " de " + wd + " dias de trabalho de " + nome + " já estão cobertos pelo seu saldo.";
+    $("nbRow").hidden = false;
+    $("nbContas").textContent = fmt(totN);
+    $("nbFalta").textContent = totN - saldo > 0.5 ? "Falta " + fmt(totN - saldo) : "Tudo coberto";
+    $("nbVer").textContent = "Ver contas de " + nome;
+  } else {
+    dots.hidden = true; $("nbRow").hidden = true;
+    $("nbLegend").textContent = "Nenhuma conta programada para " + nome + " ainda.";
+    $("nbVer").textContent = "Adicionar contas de " + nome;
   }
 }
 
@@ -1368,6 +1444,7 @@ $("addConta").onclick = ()=>openConta(contasK, null);
 $("cPrev").onclick = ()=>{ contasK = addMonths(contasK,-1); renderContas(); };
 $("cNext").onclick = ()=>{ contasK = addMonths(contasK, 1); renderContas(); };
 $("cHoje").onclick = ()=>{ contasK = curKey(); renderContas(); };
+$("nbVer").onclick = ()=>{ contasK = addMonths(curKey(), 1); selectTab("contas"); renderContas(); window.scrollTo(0,0); };
 $("cfgMargem").addEventListener("change", ()=>{
   let v = parseInt($("cfgMargem").value,10); if (!(v>=0)) v = 0; if (v>100) v = 100;
   salvarCfg({ ...perfil.cfg, margem: v });
