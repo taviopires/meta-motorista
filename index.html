@@ -143,7 +143,7 @@ input:focus-visible{outline:none}
 .list .chev{color:var(--muted);font-size:1.4rem;line-height:1;flex:0 0 auto;margin-left:2px}
 .list li:last-child{border-bottom:0}
 .list .main{flex:1;min-width:0}
-.list .main strong{display:block;font-weight:600;overflow-wrap:anywhere}
+.list .main strong{display:block;font-weight:600;overflow-wrap:break-word;hyphens:auto}
 .list .main span{font-size:.83rem;color:var(--muted)}
 .list .val{font-family:var(--cond);font-weight:700;font-size:1.1rem;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .empty{color:var(--muted);padding:12px 0}
@@ -163,7 +163,8 @@ input:focus-visible{outline:none}
 /* Dias da semana */
 .daypicks label{margin:0}
 .daypicks input{position:absolute;opacity:0;pointer-events:none}
-.daypicks{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.daypicks{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+@media (max-width:419px){.daypicks{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .daypicks span{display:block;min-width:0;text-align:center;padding:9px 10px;border-radius:999px;font-weight:600;font-size:.9rem;cursor:pointer;background:var(--surface-2)}
 .daypicks input:checked+span{background:var(--primary);color:var(--on-primary)}
 .daypicks input:focus-visible+span{outline:3px solid var(--lane);outline-offset:2px}
@@ -198,6 +199,61 @@ code{background:var(--surface-2);padding:1px 6px;border-radius:6px;font-size:.9e
 .erro-list{padding-left:20px;margin:6px 0 0}.erro-list li{margin-bottom:8px}
 .wide{display:none}
 @media (min-width:480px){.wide{display:inline}}
+/* Chips (atalhos) */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.chip{border:0;border-radius:999px;padding:9px 14px;background:var(--surface-2);font-weight:600;font-size:.86rem;cursor:pointer;min-height:40px}
+.chip[aria-pressed="true"]{background:var(--primary);color:var(--on-primary)}
+.chip-input{display:inline-flex;align-items:center;gap:4px;background:var(--surface-2);border-radius:999px;padding:0 12px 0 4px;min-height:40px}
+.chip-input input[type=number]{-moz-appearance:textfield;appearance:textfield;width:72px;text-align:center;height:36px;padding:4px 8px;background:transparent;border:2px solid transparent;border-radius:999px;font-weight:600;font-size:.9rem;text-align:right}
+.chip-input input[type=number]:focus{border-color:var(--ink)}
+.chip-input input::-webkit-inner-spin-button,.chip-input input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.chip-input.on{background:var(--primary);color:var(--on-primary)}
+.chip-input.on input{color:var(--on-primary)}
+
+/* Navegação de meses na aba Contas */
+.monthnav{margin:0 0 16px}
+.monthnav-title{text-align:center;min-width:0}
+.monthnav-title .btn.linklike{min-height:auto;padding:2px 4px;font-size:.8rem}
+
+/* Linha de conta */
+.crow{display:flex;align-items:center;gap:10px}
+@media (max-width:399px){ .list .val{font-size:1rem} .list .chev{margin-left:0} .list .row{gap:8px} }
+.crow .row{flex:1;min-width:0}
+.pay{flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:2px solid var(--muted);background:transparent;color:transparent;display:grid;place-items:center;cursor:pointer;padding:0}
+.pay[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#fff}
+.pay:hover{border-color:var(--ink)}
+.is-paga .main strong,.is-paga .val{color:var(--muted)}
+.list .main .meta{display:block;font-size:.83rem;color:var(--muted);margin-top:2px}
+.list .main .tag{display:inline-block;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;font-size:.72rem;font-weight:600;color:var(--ink);background:var(--surface-2);padding:2px 8px;border-radius:999px;margin:0 6px 2px 0}
+.list .main .venc.neg{color:var(--warn);font-weight:600}
+.list .main .venc.pos{color:var(--good);font-weight:600}
+
+/* Resumo de pagamentos */
+.paybox{margin:0 0 6px}
+.paybox-row{display:flex;justify-content:space-between;gap:10px;font-size:.88rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}
+.paybox-row strong{color:var(--ink);font-weight:600}
+.paybar{height:6px;background:var(--track);border-radius:999px;overflow:hidden}
+.paybar div{height:100%;background:var(--good);border-radius:999px;transition:width .4s}
+
+/* Controles do diálogo */
+.seg-label{font-size:.85rem;font-weight:600;margin-bottom:6px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;background:var(--surface-2);border-radius:12px;padding:4px}
+.seg label{margin:0;position:relative}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:flex;align-items:center;justify-content:center;text-align:center;min-height:42px;padding:6px;border-radius:9px;font-weight:600;font-size:.86rem;cursor:pointer;line-height:1.2}
+.seg input:checked+span{background:var(--primary);color:var(--on-primary)}
+.seg input:focus-visible+span{outline:3px solid var(--lane);outline-offset:1px}
+.dlg-info{background:var(--surface-2);border-radius:10px;padding:10px 12px;font-size:.86rem;color:var(--muted)}
+.dlg-info .btn{min-height:auto;padding:4px 0;margin-top:4px}
+dialog .actions .btn.danger{margin-left:auto}
+.dlg2{padding:22px}
+.dlg2 h3{margin:0 0 8px;font-size:1.3rem}
+.choice-list{display:grid;gap:8px;margin-top:14px}
+.choice-list .btn{width:100%}
+.btn.danger-solid{background:var(--warn);color:#fff}
+@media (max-width:399px){ dialog .actions .btn{flex:1 1 auto} dialog .actions .btn.danger{margin-left:0} }
+@media (max-width:399px){ .seg span{font-size:.78rem;padding:4px 2px} dialog form{padding:18px 16px} }
+
 [hidden]{display:none!important}
 </style>
 
@@ -326,13 +382,19 @@ code{background:var(--surface-2);padding:1px 6px;border-radius:6px;font-size:.9e
     </div>
 
     <div class="panel" style="margin-top:16px" id="dueBox">
-      <h2>Próximos vencimentos</h2>
+      <h2>Contas a pagar</h2>
       <ul class="list" id="dueList"></ul>
     </div>
   </section>
 
   <!-- CONTAS -->
   <section id="view-contas" hidden>
+    <div class="monthbar monthnav">
+      <button class="btn ghost small" id="cPrev" type="button" aria-label="Mês anterior">‹<span class="lbl"> Anterior</span></button>
+      <div class="monthnav-title"><h2 id="cMonth"></h2><button class="btn linklike" id="cHoje" type="button" hidden>Voltar para o mês atual</button></div>
+      <button class="btn ghost small" id="cNext" type="button" aria-label="Próximo mês"><span class="lbl">Próximo </span>›</button>
+    </div>
+
     <div class="panel">
       <h2 id="tTitle">Quanto você precisa ganhar</h2>
       <div class="targets">
@@ -342,25 +404,35 @@ code{background:var(--surface-2);padding:1px 6px;border-radius:6px;font-size:.9e
       </div>
       <p class="note" id="tNote"></p>
     </div>
+
     <div class="grid two">
       <div class="panel">
-        <h2>Contas e despesas mensais</h2>
+        <h2>Contas do mês</h2>
+        <div class="paybox" id="payBox">
+          <div class="paybox-row"><span id="payTxt"></span><strong id="payFalta"></strong></div>
+          <div class="paybar"><div id="payFill"></div></div>
+        </div>
+        <p class="note" id="legacyNote" hidden>Este mês foi registrado antes da nova organização das contas. Você pode marcar as contas como pagas, mas não pode editá-las.</p>
         <ul class="list" id="contasList"></ul>
         <div class="total-row"><span>Total</span><span id="contasTotal">R$ 0</span></div>
         <div class="actions"><button class="btn primary" id="addConta" type="button">Adicionar conta</button></div>
-        <p class="hint">Toque em uma conta para editar ou excluir. Mudanças valem para este mês e os próximos. Os meses anteriores ficam como estavam no histórico.</p>
+        <p class="hint">Toque no círculo para marcar como paga. Toque na conta para editar ou excluir.</p>
       </div>
+
       <div class="panel">
         <h2>Como você trabalha</h2>
-        <label>Dias em que você roda</label>
+        <label id="lblDias">Dias em que você roda</label>
+        <div class="chips" id="dayPresets" role="group" aria-labelledby="lblDias"></div>
         <div class="daypicks" id="dayPicks"></div>
-        <div style="margin-top:16px">
-          <label for="cfgMargem">Margem de segurança (%)</label>
-          <input type="number" id="cfgMargem" min="0" max="100" step="1" inputmode="numeric">
-          <p class="hint">Um valor extra sobre as contas para imprevistos. Ex.: 10% sobre R$ 3.000 dá meta de R$ 3.300.</p>
+        <label id="lblMargem" style="margin-top:24px">Margem de segurança</label>
+        <div class="chips" id="margemChips" role="group" aria-labelledby="lblMargem">
+          <span class="chip-input"><input type="number" id="cfgMargem" min="0" max="100" step="1" inputmode="numeric" placeholder="Outro" aria-label="Outra margem, em porcentagem"><span aria-hidden="true">%</span></span>
         </div>
+        <p class="hint">Um valor extra sobre as contas, para imprevistos. Com 10% sobre R$ 3.000, a meta fica em R$ 3.300.</p>
+        <p class="hint">Essas configurações valem para o mês atual e os próximos.</p>
       </div>
     </div>
+
     <div class="panel" style="margin-top:16px">
       <h2>Backup dos dados</h2>
       <p class="note" style="margin-top:0">Seus dados já ficam na nuvem. O backup é uma cópia extra em arquivo, e também serve para trazer dados da versão antiga do app.</p>
@@ -407,6 +479,13 @@ code{background:var(--surface-2);padding:1px 6px;border-radius:6px;font-size:.9e
     </div>
   </form>
 </dialog>
+<dialog id="dlg2">
+  <div class="dlg2">
+    <h3 id="d2Title"></h3>
+    <p class="note" id="d2Text" style="margin-top:0"></p>
+    <div class="choice-list" id="d2Opts"></div>
+  </div>
+</dialog>
 <div class="toast" id="toast" role="status"></div>
 <script>
   window.__mmBoot = false;
@@ -428,7 +507,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, onSnapshot,
-  collection, writeBatch, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  collection, writeBatch, arrayUnion, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ================= Utilidades =================
 const $ = id => document.getElementById(id);
@@ -453,6 +532,12 @@ function parseNum(s){
   const n = parseFloat(s); return isFinite(n) ? n : 0;
 }
 const numToInput = n => n ? String(n).replace(".",",") : "";
+// Meses no formato "AAAA-MM"
+const addMonths = (k,n) => { const [y,m] = k.split("-").map(Number); const d = new Date(y,m-1+n,1); return mk(d.getFullYear(), d.getMonth()); };
+const mdiff = (a,b) => { const [y1,m1] = a.split("-").map(Number), [y2,m2] = b.split("-").map(Number); return (y2-y1)*12 + (m2-m1); };
+const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+function monthLabel(k){ const [y,m] = k.split("-").map(Number); return cap(new Date(y,m-1,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"})); }
+function monthShort(k){ const [y,m] = k.split("-").map(Number); const o = y === new Date().getFullYear() ? {month:"long"} : {month:"long",year:"numeric"}; return new Date(y,m-1,1).toLocaleDateString("pt-BR",o); }
 let toastT;
 function toast(t){ const el=$("toast"); el.textContent=t; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2400); }
 function setStatus(t){ $("status").textContent = t; }
@@ -478,19 +563,70 @@ const LEGACY_KEY = "meta-motorista-v1";
 let uid = null, perfil = null, meses = {}, unsubs = [];
 let perfilReady = false, mesesReady = false, initingPerfil = false;
 const creating = {};
-let histY, histM, currentTab = "hoje";
+let histY, histM, contasK, currentTab = "hoje", migrando = false;
 
 const perfilRef = () => doc(db, "usuarios", uid);
 const mesRef = k => doc(db, "usuarios", uid, "meses", k);
 const mesesCol = () => collection(db, "usuarios", uid, "meses");
 
 function normCfg(c){ const r = Object.assign(clone(DEF_CFG), c || {}); if (!Array.isArray(r.dias) || !r.dias.length) r.dias = DEF_CFG.dias.slice(); r.margem = Number(r.margem)||0; return r; }
-function normPerfil(d){ d = d || {}; return { cfg: normCfg(d.cfg), contasPadrao: Array.isArray(d.contasPadrao) ? d.contasPadrao : [] }; }
-function normMes(d){ d = d || {}; return { contas: Array.isArray(d.contas) ? d.contas : [], cfg: normCfg(d.cfg), ganhos: Array.isArray(d.ganhos) ? d.ganhos : [] }; }
-// Mês para exibir: o salvo, ou um "virtual" baseado nas contas atuais
+function normPerfil(d){
+  d = d || {};
+  return {
+    cfg: normCfg(d.cfg),
+    contasPadrao: Array.isArray(d.contasPadrao) ? d.contasPadrao : [],   // formato antigo
+    defs: Array.isArray(d.defs) ? d.defs : null,                           // formato novo
+    migradoEm: typeof d.migradoEm === "string" ? d.migradoEm : null
+  };
+}
+function normMes(d){
+  d = d || {};
+  return {
+    contas: Array.isArray(d.contas) ? d.contas : null,   // retrato do formato antigo
+    cfg: d.cfg ? normCfg(d.cfg) : null,
+    ganhos: Array.isArray(d.ganhos) ? d.ganhos : [],
+    ajustes: d.ajustes && typeof d.ajustes === "object" ? d.ajustes : {},
+    pagas: d.pagas && typeof d.pagas === "object" ? d.pagas : {}
+  };
+}
+// Mês registrado antes da nova organização: usa o retrato salvo, só leitura
+function isLegacyMonth(k){
+  const md = meses[k];
+  if (!perfil || !md || !md.contas) return false;
+  return !perfil.defs || (perfil.migradoEm && k < perfil.migradoEm);
+}
+function versaoEm(def,k){
+  const vs = (def.versoes || []).filter(v => v.desde <= k);
+  return vs.length ? vs[vs.length-1] : ((def.versoes || [])[0] || { nome:"Conta", valor:0, dia:null });
+}
+const defAtiva = (def,k) => def.inicio <= k && (!def.fim || k <= def.fim);
+function contasDoMes(k){
+  if (!perfil) return [];
+  const md = meses[k], pagas = md ? md.pagas : {}, ajustes = md ? md.ajustes : {};
+  if (isLegacyMonth(k))
+    return md.contas.map(c => ({ id:c.id, nome:c.nome, valor:Number(c.valor)||0, dia:c.dia ?? null, tipo:"mensal", legado:true, paga:!!pagas[c.id] }));
+  if (!perfil.defs)
+    return perfil.contasPadrao.map(c => ({ id:c.id, nome:c.nome, valor:Number(c.valor)||0, dia:c.dia ?? null, tipo:"mensal", legado:true, paga:!!pagas[c.id] }));
+  const out = [];
+  perfil.defs.forEach(def => {
+    if (!defAtiva(def,k)) return;
+    const aj = ajustes[def.id];
+    if (aj && aj.removida) return;
+    const v = versaoEm(def,k);
+    const c = { id:def.id, tipo:def.tipo, nome:v.nome, valor:Number(v.valor)||0, dia:v.dia ?? null, paga:!!pagas[def.id], ajustado:false };
+    if (aj){ ["nome","valor","dia"].forEach(f => { if (aj[f] !== undefined) c[f] = aj[f]; }); c.ajustado = true; }
+    if (def.tipo === "parcelada"){ c.parcela = mdiff(def.inicio,k) + 1; c.parcelas = def.parcelas; }
+    out.push(c);
+  });
+  return out;
+}
+function cfgDoMes(k){
+  const md = meses[k];
+  if (k < curKey() && md && md.cfg) return md.cfg;   // meses passados guardam a configuração da época
+  return perfil ? perfil.cfg : normCfg();
+}
 function mesView(k){
-  if (meses[k]) return meses[k];
-  return { contas: perfil ? perfil.contasPadrao : [], cfg: perfil ? perfil.cfg : normCfg(), ganhos: [], virtual: true };
+  return { contas: contasDoMes(k), cfg: cfgDoMes(k), ganhos: meses[k] ? meses[k].ganhos : [], virtual: !meses[k] };
 }
 
 // ================= Cálculos =================
@@ -507,27 +643,24 @@ const metaSemanal = (md,y,m) => metaDiariaBase(md,y,m) * md.cfg.dias.length;
 
 // ================= Escrita na nuvem =================
 function w(p){ p.catch(e => { console.error(e); toast("Não foi possível salvar: " + (e.code || "erro")); }); }
-function salvarContas(contas){
-  const k = curKey();
-  w(setDoc(mesRef(k), { contas }, { merge:true }));
-  w(setDoc(perfilRef(), { contasPadrao: contas }, { merge:true }));
-}
+function salvarDefs(defs){ w(setDoc(perfilRef(), { defs }, { merge:true })); }
+function setAjuste(k, id, val){ w(setDoc(mesRef(k), { ajustes: { [id]: val === null ? deleteField() : val } }, { merge:true })); }
+function setPaga(k, id, paga){ w(setDoc(mesRef(k), { pagas: { [id]: paga ? true : deleteField() } }, { merge:true })); }
 function salvarCfg(cfg){
-  const k = curKey();
-  w(setDoc(mesRef(k), { cfg }, { merge:true }));
+  w(setDoc(mesRef(curKey()), { cfg }, { merge:true }));
   w(setDoc(perfilRef(), { cfg }, { merge:true }));
 }
 function addGanho(g){
   const k = g.data.slice(0,7);
   const data = { ganhos: arrayUnion(g) };
-  if (!meses[k]){ data.contas = perfil.contasPadrao; data.cfg = perfil.cfg; }
+  if (!meses[k] && k >= curKey()) data.cfg = perfil.cfg;
   w(setDoc(mesRef(k), data, { merge:true }));
 }
 function setGanhos(k, ganhos){ w(setDoc(mesRef(k), { ganhos }, { merge:true })); }
 
 function importar(d){
   const batch = writeBatch(db);
-  if (d && d.versao === 2){
+  if (d && (d.versao === 2 || d.versao === 3)){
     batch.set(perfilRef(), normPerfil(d.perfil));
     Object.entries(d.meses || {}).forEach(([k,v]) => { if (/^\d{4}-\d{2}$/.test(k)) batch.set(mesRef(k), normMes(v)); });
   } else {
@@ -610,19 +743,33 @@ function initPerfil(){
       confirm("Encontramos dados da versão antiga salvos neste aparelho. Quer enviar para a nuvem?")){
     importar(legacy).then(()=>toast("Dados enviados para a nuvem")).catch(e=>toast("Erro ao importar: " + e.code));
   } else {
-    w(setDoc(perfilRef(), { cfg: normCfg(), contasPadrao: [] }));
+    w(setDoc(perfilRef(), { cfg: normCfg(), contasPadrao: [], defs: [], migradoEm: curKey() }));
   }
 }
 
 function afterLoad(){
   if (!perfilReady || !mesesReady) return;
   const k = curKey();
+  if (!perfil.defs && !migrando) migrar();
   if (!meses[k] && !creating[k]){
     creating[k] = true;
     // merge sem "ganhos": nunca apaga lançamentos feitos em outro aparelho
-    w(setDoc(mesRef(k), { contas: perfil.contasPadrao, cfg: perfil.cfg }, { merge:true }));
+    w(setDoc(mesRef(k), { cfg: perfil.cfg }, { merge:true }));
   }
   renderAll();
+}
+
+// Converte as contas do formato antigo em "contas de todo mês"
+function migrar(){
+  migrando = true;
+  const ck = curKey();
+  const keys = Object.keys(meses).filter(x => /^\d{4}-\d{2}$/.test(x)).sort();
+  const inicio = keys[0] && keys[0] < ck ? keys[0] : ck;
+  const defs = perfil.contasPadrao.map(c => ({
+    id: c.id || uidGen(), tipo: "mensal", inicio, fim: null,
+    versoes: [{ desde: inicio, nome: String(c.nome || "Conta"), valor: Number(c.valor) || 0, dia: c.dia ?? null }]
+  }));
+  setDoc(perfilRef(), { defs, migradoEm: ck }, { merge:true }).catch(e => { migrando = false; console.error(e); });
 }
 
 function syncStatus(meta){
@@ -704,18 +851,66 @@ function renderHoje(){
   }
   $("mNote").textContent = note;
 
-  const due = md.contas.filter(c=>Number(c.dia)>=1).map(c=>{
-    const d = Number(c.dia);
-    let dt = new Date(y,m,Math.min(d,daysInMonth(y,m)));
-    if (d < today) dt = new Date(y,m+1,Math.min(d,daysInMonth(y,m+1)));
-    return {c,dt};
-  }).sort((a,b)=>a.dt-b.dt).slice(0,4);
+  const ck = mk(y,m);
+  const pend = md.contas.filter(c => !c.paga).sort(ordemVenc);
   const ul = $("dueList"); ul.innerHTML = "";
-  $("dueBox").hidden = due.length === 0;
-  due.forEach(({c,dt})=>{
-    const days = Math.round((dt - new Date(y,m,today))/86400000);
-    ul.append(row(c.nome, (days===0?"Vence hoje":days===1?"Vence amanhã":"Vence em "+days+" dias") + " · dia " + c.dia, fmt2(c.valor)));
-  });
+  $("dueBox").hidden = md.contas.length === 0;
+  if (!pend.length){
+    const li = document.createElement("li"); li.className = "empty";
+    li.textContent = "Todas as contas deste mês estão pagas.";
+    ul.append(li);
+  }
+  pend.slice(0,5).forEach(c => ul.append(contaRow(c, ck, false)));
+  if (pend.length > 5){
+    const li = document.createElement("li"); li.className = "empty";
+    li.textContent = "Mais " + (pend.length - 5) + " na aba Contas.";
+    ul.append(li);
+  }
+}
+
+function ordemVenc(a,b){
+  if (a.paga !== b.paga) return a.paga ? 1 : -1;
+  const da = a.dia || 99, dbb = b.dia || 99;
+  return da - dbb || (b.valor - a.valor);
+}
+function vencInfo(c,k){
+  if (c.paga) return { t:"Paga", cls:"pos" };
+  if (!c.dia) return { t:"Sem vencimento", cls:"" };
+  const ck = curKey();
+  if (k === ck){
+    const hoje = new Date().getDate();
+    if (c.dia < hoje) return { t:"Venceu dia " + c.dia, cls:"neg" };
+    if (c.dia === hoje) return { t:"Vence hoje", cls:"neg" };
+    if (c.dia === hoje + 1) return { t:"Vence amanhã", cls:"" };
+  }
+  if (k < ck) return { t:"Vencia dia " + c.dia, cls:"" };
+  return { t:"Vence dia " + c.dia, cls:"" };
+}
+function contaRow(c, k, editavel){
+  const li = document.createElement("li"); if (c.paga) li.className = "is-paga";
+  const wrap = document.createElement("div"); wrap.className = "crow";
+  const pay = document.createElement("button"); pay.type = "button"; pay.className = "pay";
+  pay.setAttribute("aria-pressed", c.paga ? "true" : "false");
+  pay.setAttribute("aria-label", c.paga ? "Desmarcar " + c.nome + " como paga" : "Marcar " + c.nome + " como paga");
+  pay.innerHTML = '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  pay.onclick = () => { setPaga(k, c.id, !c.paga); toast(c.paga ? c.nome + ": marcada como não paga" : c.nome + ": paga"); };
+  const r = document.createElement(editavel ? "button" : "div"); r.className = "row";
+  if (editavel){ r.type = "button"; r.onclick = () => openConta(k, c); r.setAttribute("aria-label", "Editar " + c.nome + ", " + fmt2(c.valor)); }
+  const main = document.createElement("div"); main.className = "main";
+  const st = document.createElement("strong"); st.textContent = c.nome;
+  const meta = document.createElement("span"); meta.className = "meta";
+  const tag = t => { const e = document.createElement("span"); e.className = "tag"; e.textContent = t; meta.append(e); };
+  if (c.tipo === "parcelada" && c.parcelas) tag("Parcela " + c.parcela + "/" + c.parcelas);
+  if (c.tipo === "unica") tag("Única");
+  if (c.ajustado) tag("Ajustado");
+  const vi = vencInfo(c,k);
+  const ve = document.createElement("span"); ve.className = "venc " + vi.cls; ve.textContent = vi.t; meta.append(ve);
+  main.append(st, meta);
+  const v = document.createElement("span"); v.className = "val"; v.textContent = fmt2(c.valor);
+  r.append(main, v);
+  if (editavel){ const ch = document.createElement("span"); ch.className = "chev"; ch.setAttribute("aria-hidden","true"); ch.textContent = "›"; r.append(ch); }
+  wrap.append(pay, r); li.append(wrap);
+  return li;
 }
 
 function row(title, sub, val, onEdit, label){
@@ -733,41 +928,80 @@ function row(title, sub, val, onEdit, label){
 }
 
 function renderContas(){
-  const now = new Date(), y = now.getFullYear(), m = now.getMonth();
-  const md = mesView(mk(y,m));
+  const k = contasK, ck = curKey();
+  const [yy, mm] = k.split("-").map(Number), y = yy, m = mm - 1;
+  const md = mesView(k), legado = isLegacyMonth(k);
+  $("cMonth").textContent = monthLabel(k);
+  $("cHoje").hidden = k === ck;
+  $("legacyNote").hidden = !legado;
+  $("addConta").hidden = legado;
+
+  // Lista
   const ul = $("contasList"); ul.innerHTML = "";
   if (!md.contas.length){
-    const li = document.createElement("li"); li.className="empty";
-    li.textContent = "Nenhuma conta ainda. Comece por aluguel, luz, água, internet, celular, mercado e os custos do carro.";
+    const li = document.createElement("li"); li.className = "empty";
+    li.textContent = k > ck ? "Nenhuma conta programada para este mês ainda."
+      : "Nenhuma conta ainda. Comece por aluguel, luz, água, internet, celular, mercado e os custos do carro.";
     ul.append(li);
   }
-  md.contas.slice().sort((a,b)=>(b.valor||0)-(a.valor||0)).forEach(c=>{
-    ul.append(row(c.nome, c.dia ? "Vence dia " + c.dia : "Sem vencimento definido", fmt2(c.valor), ()=>openConta(c)));
-  });
-  $("contasTotal").textContent = fmt2(totalContas(md));
-  $("tTitle").textContent = "Quanto você precisa ganhar em " + new Date(y,m,1).toLocaleDateString("pt-BR",{month:"long"});
+  md.contas.slice().sort(ordemVenc).forEach(c => ul.append(contaRow(c, k, !legado && !c.legado)));
+  const total = totalContas(md), pago = md.contas.filter(c => c.paga).reduce((a,c) => a + c.valor, 0);
+  $("contasTotal").textContent = fmt2(total);
+  $("payBox").hidden = !md.contas.length;
+  $("payTxt").textContent = "Pago " + fmt2(pago) + " de " + fmt2(total);
+  $("payFalta").textContent = total - pago > 0.004 ? "Falta pagar " + fmt2(total - pago) : "Tudo pago";
+  $("payFill").style.width = (total > 0 ? Math.min(100, pago/total*100) : 0) + "%";
+
+  // Metas do mês
+  $("tTitle").textContent = "Quanto você precisa ganhar em " + monthShort(k);
   $("tMes").textContent = fmt(metaMensal(md));
   $("tSemana").textContent = fmt(metaSemanal(md,y,m));
   $("tDia").textContent = fmt(metaDiariaBase(md,y,m));
-  $("tNote").textContent = "Este mês tem " + workDaysInMonth(md,y,m) + " dias de trabalho (" + md.cfg.dias.length + " por semana)" +
+  $("tNote").textContent = cap(monthShort(k)) + " tem " + workDaysInMonth(md,y,m) + " dias de trabalho (" + md.cfg.dias.length + " por semana)" +
     (md.cfg.margem ? ", com " + md.cfg.margem + "% de margem de segurança." : ".") + " Valores líquidos, depois dos gastos do dia.";
 
+  // Como você trabalha (configuração atual)
+  const cfg = perfil.cfg;
   const dp = $("dayPicks");
   if (!dp.childElementCount){
-    [1,2,3,4,5,6,0].forEach(d=>{
+    [1,2,3,4,5,6,0].forEach(d => {
       const l = document.createElement("label");
-      const i = document.createElement("input"); i.type="checkbox"; i.value=d;
-      i.onchange = ()=>{
-        const sel = [...dp.querySelectorAll("input:checked")].map(x=>Number(x.value));
+      const i = document.createElement("input"); i.type = "checkbox"; i.value = d;
+      i.onchange = () => {
+        const sel = [...dp.querySelectorAll("input:checked")].map(x => Number(x.value));
         if (!sel.length){ i.checked = true; toast("Escolha pelo menos um dia"); return; }
-        salvarCfg({ ...mesView(curKey()).cfg, dias: sel });
+        salvarCfg({ ...perfil.cfg, dias: sel });
       };
       const sp = document.createElement("span"); sp.textContent = DOW[d];
-      l.append(i,sp); dp.append(l);
+      l.append(i, sp); dp.append(l);
     });
   }
-  dp.querySelectorAll("input").forEach(i=>{ i.checked = md.cfg.dias.includes(Number(i.value)); });
-  if (document.activeElement !== $("cfgMargem")) $("cfgMargem").value = md.cfg.margem || 0;
+  dp.querySelectorAll("input").forEach(i => { i.checked = cfg.dias.includes(Number(i.value)); });
+
+  const PRESETS = [["Seg a sex",[1,2,3,4,5]],["Seg a sáb",[1,2,3,4,5,6]],["Todos os dias",[0,1,2,3,4,5,6]]];
+  const pr = $("dayPresets");
+  if (!pr.childElementCount){
+    PRESETS.forEach(([t,dias]) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = t; b.dataset.dias = dias.join(",");
+      b.onclick = () => salvarCfg({ ...perfil.cfg, dias: dias.slice() });
+      pr.append(b);
+    });
+  }
+  const atual = cfg.dias.slice().sort().join(",");
+  pr.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", b.dataset.dias.split(",").map(Number).sort().join(",") === atual ? "true" : "false"));
+
+  const mc = $("margemChips"), inp = $("cfgMargem");
+  if (!mc.querySelector(".chip")){
+    [0,5,10,15,20].forEach(v => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = v + "%"; b.dataset.v = v;
+      b.onclick = () => { inp.value = ""; salvarCfg({ ...perfil.cfg, margem: v }); };
+      mc.insertBefore(b, mc.querySelector(".chip-input"));
+    });
+  }
+  const padrao = [0,5,10,15,20].includes(cfg.margem);
+  mc.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", Number(b.dataset.v) === cfg.margem ? "true" : "false"));
+  mc.querySelector(".chip-input").classList.toggle("on", !padrao);
+  if (document.activeElement !== inp) inp.value = padrao ? "" : cfg.margem;
 }
 
 function renderHist(){
@@ -860,24 +1094,174 @@ function openDialog(title, fields, onSave, onDelete){
 }
 $("dlgForm").addEventListener("submit", e=>{ e.preventDefault(); if (dlgSave && dlgSave() !== false) dlg.close(); });
 $("dlgCancel").onclick = ()=>dlg.close();
-$("dlgDelete").onclick = ()=>{ if (dlgDel && confirm("Excluir este item?")){ dlgDel(); dlg.close(); } };
+$("dlgDelete").onclick = async ()=>{ if (!dlgDel) return; const r = await dlgDel(); if (r !== false) dlg.close(); };
 
-function openConta(c){
+function fieldSelect(id, label, opts, value, o={}){
+  const d = document.createElement("div"); if (o.full) d.className = "full";
+  const l = document.createElement("label"); l.htmlFor = id; l.textContent = label;
+  const sel = document.createElement("select"); sel.id = id;
+  opts.forEach(([v,t]) => { const op = document.createElement("option"); op.value = v; op.textContent = t; sel.append(op); });
+  sel.value = value;
+  d.append(l, sel); return d;
+}
+function segField(name, label, opts, value, onChange){
+  const d = document.createElement("div"); d.className = "full";
+  const lb = document.createElement("div"); lb.className = "seg-label"; lb.id = name + "L"; lb.textContent = label;
+  const g = document.createElement("div"); g.className = "seg"; g.setAttribute("role","radiogroup"); g.setAttribute("aria-labelledby", name + "L");
+  opts.forEach(([v,t]) => {
+    const l = document.createElement("label");
+    const i = document.createElement("input"); i.type = "radio"; i.name = name; i.value = v; i.checked = v === value;
+    if (onChange) i.onchange = () => onChange(v);
+    const sp = document.createElement("span"); sp.textContent = t;
+    l.append(i, sp); g.append(l);
+  });
+  d.append(lb, g); return d;
+}
+const segValue = name => (document.querySelector('input[name="' + name + '"]:checked') || {}).value;
+function monthOptions(extra){
+  const ck = curKey(), out = [];
+  for (let i = -12; i <= 36; i++){ const k = addMonths(ck, i); out.push([k, monthLabel(k)]); }
+  if (extra && !out.some(o => o[0] === extra)) out.unshift([extra, monthLabel(extra)]);
+  return out;
+}
+function choose(title, text, opts){
+  return new Promise(res => {
+    const d = $("dlg2"); $("d2Title").textContent = title; $("d2Text").textContent = text;
+    const box = $("d2Opts"); box.innerHTML = "";
+    let done = false;
+    const fin = v => { if (done) return; done = true; if (d.open) d.close(); res(v); };
+    opts.forEach(([v,t,kind]) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn " + (kind === "danger" ? "danger-solid" : "ghost"); b.textContent = t; b.onclick = () => fin(v); box.append(b); });
+    const c = document.createElement("button"); c.type = "button"; c.className = "btn linklike"; c.textContent = "Cancelar"; c.onclick = () => fin(null); box.append(c);
+    d.onclose = () => fin(null);
+    d.showModal();
+  });
+}
+
+function openConta(k, c){
   const isNew = !c;
-  openDialog(isNew ? "Nova conta" : "Editar conta", [
-    field("cNome","Nome", c?.nome, {full:true, required:true, placeholder:"Ex.: aluguel, parcela do carro"}),
-    field("cValor","Valor mensal (R$)", c ? numToInput(c.valor) : "", {inputmode:"decimal", required:true, placeholder:"0,00"}),
-    field("cDia","Dia do vencimento", c?.dia || "", {type:"number", inputmode:"numeric", min:1, max:31, opt:true})
-  ], ()=>{
-    const nome = $("cNome").value.trim(), valor = parseNum($("cValor").value), dia = parseInt($("cDia").value,10);
+  const def = c ? (perfil.defs || []).find(d => d.id === c.id) : null;
+  if (!isNew && !def){ toast("Esta conta não pode ser editada"); return; }
+  const tipo0 = def ? def.tipo : "mensal";
+  const mesK = monthShort(k);
+  const fields = [];
+
+  fields.push(field("cNome", "Nome", c?.nome, { full:true, required:true, placeholder:"Ex.: aluguel, parcela do carro" }));
+  const fValor = field("cValor", tipo0 === "parcelada" ? "Valor da parcela" : "Valor", c ? numToInput(c.valor) : "", { inputmode:"decimal", required:true, placeholder:"R$ 0,00" });
+  fields.push(fValor);
+  fields.push(field("cDia", "Vence no dia", c?.dia || "", { type:"number", inputmode:"numeric", min:1, max:31, opt:true }));
+
+  if (isNew){
+    fields.push(segField("cTipo", "Essa conta se repete?", [["mensal","Todo mês"],["parcelada","Parcelada"],["unica","Só uma vez"]], "mensal", mostrar));
+  } else {
+    const info = document.createElement("div"); info.className = "full dlg-info";
+    info.textContent = tipo0 === "mensal" ? "Conta de todo mês, desde " + monthShort(def.inicio) + "." :
+                       tipo0 === "parcelada" ? "Parcelada em " + def.parcelas + "x, de " + monthShort(def.inicio) + " a " + monthShort(addMonths(def.inicio, def.parcelas - 1)) + "." :
+                       "Conta de um mês só.";
+    fields.push(info);
+  }
+
+  const fInicio = fieldSelect("cInicio", "Começa em", monthOptions(), k, { full:true });
+  const fN = field("cParcelas", "Total de parcelas", def?.parcelas || "", { type:"number", inputmode:"numeric", min:1, max:360, placeholder:"Ex.: 12" });
+  const fAtual = field("cAtual", "Parcela de " + mesK, c?.parcela || 1, { type:"number", inputmode:"numeric", min:1, max:360 });
+  const fMes = fieldSelect("cMes", "Em qual mês", monthOptions(def?.inicio), def ? def.inicio : k, { full:true });
+  fields.push(fInicio, fN, fAtual, fMes);
+
+  let fEscopo = null;
+  if (!isNew && tipo0 !== "unica"){
+    fEscopo = segField("cEscopo", "Mudança de nome, valor ou vencimento vale para", [["diante", "De " + mesK + " em diante"], ["so", "Só " + mesK]], "diante");
+    fields.push(fEscopo);
+  }
+  if (!isNew && c.ajustado){
+    const info = document.createElement("div"); info.className = "full dlg-info";
+    const v = versaoEm(def, k);
+    info.append("Neste mês o valor foi ajustado só para " + mesK + ". O valor normal é " + fmt2(v.valor) + ". ");
+    const b = document.createElement("button"); b.type = "button"; b.className = "btn linklike"; b.textContent = "Voltar ao valor normal";
+    b.onclick = () => { setAjuste(k, def.id, null); dlg.close(); toast("Valor normal restaurado"); };
+    info.append(b); fields.push(info);
+  }
+
+  function mostrar(t){
+    fInicio.hidden = !(isNew && t === "mensal");
+    fN.hidden = fAtual.hidden = t !== "parcelada";
+    fMes.hidden = t !== "unica";
+    fValor.querySelector("label").textContent = t === "parcelada" ? "Valor da parcela" : "Valor";
+  }
+  mostrar(tipo0);
+
+  openDialog(isNew ? "Nova conta" : "Editar conta", fields, () => {
+    const nome = $("cNome").value.trim(), valor = parseNum($("cValor").value);
+    const diaN = parseInt($("cDia").value, 10), dia = diaN >= 1 && diaN <= 31 ? diaN : null;
     if (!nome){ toast("Informe o nome da conta"); return false; }
     if (valor <= 0){ toast("Informe um valor maior que zero"); return false; }
-    const obj = { id: c ? c.id : uidGen(), nome, valor, dia: dia>=1 && dia<=31 ? dia : null };
-    const contas = clone(mesView(curKey()).contas);
-    if (isNew) contas.push(obj); else { const i = contas.findIndex(x=>x.id===c.id); if (i>=0) contas[i] = obj; }
-    salvarContas(contas); toast(isNew ? "Conta adicionada" : "Conta atualizada");
-  }, isNew ? null : ()=>{
-    salvarContas(clone(mesView(curKey()).contas).filter(x=>x.id!==c.id)); toast("Conta excluída");
+    const defs = clone(perfil.defs || []);
+    const tipo = isNew ? segValue("cTipo") : tipo0;
+
+    let parcelas, atual;
+    if (tipo === "parcelada"){
+      parcelas = parseInt($("cParcelas").value, 10); atual = parseInt($("cAtual").value, 10);
+      if (!(parcelas >= 1)){ toast("Informe o total de parcelas"); return false; }
+      if (!(atual >= 1 && atual <= parcelas)){ toast("A parcela de " + mesK + " deve ser entre 1 e " + parcelas); return false; }
+    }
+
+    if (isNew){
+      const id = uidGen(); let nd, msg;
+      if (tipo === "mensal"){
+        const ini = $("cInicio").value;
+        nd = { id, tipo, inicio:ini, fim:null, versoes:[{ desde:ini, nome, valor, dia }] };
+        msg = ini === k ? "Conta adicionada" : "Conta adicionada a partir de " + monthShort(ini);
+      } else if (tipo === "parcelada"){
+        const ini = addMonths(k, -(atual - 1)), fim = addMonths(ini, parcelas - 1);
+        nd = { id, tipo, inicio:ini, fim, parcelas, versoes:[{ desde:ini, nome, valor, dia }] };
+        msg = parcelas + "x adicionada, última parcela em " + monthShort(fim);
+      } else {
+        const mm = $("cMes").value;
+        nd = { id, tipo, inicio:mm, fim:mm, versoes:[{ desde:mm, nome, valor, dia }] };
+        msg = "Conta adicionada em " + monthShort(mm);
+      }
+      defs.push(nd); salvarDefs(defs); toast(msg);
+      return;
+    }
+
+    const d = defs.find(x => x.id === def.id);
+    if (d.tipo === "unica"){
+      const mm = $("cMes").value;
+      d.inicio = d.fim = mm; d.versoes = [{ desde:mm, nome, valor, dia }];
+      salvarDefs(defs); toast(mm === k ? "Conta atualizada" : "Conta movida para " + monthShort(mm));
+      return;
+    }
+    if (d.tipo === "parcelada"){
+      d.inicio = addMonths(k, -(atual - 1)); d.parcelas = parcelas; d.fim = addMonths(d.inicio, parcelas - 1);
+    }
+    const mudou = nome !== c.nome || valor !== c.valor || dia !== (c.dia ?? null);
+    const escopo = segValue("cEscopo");
+    if (mudou && escopo === "so"){
+      setAjuste(k, d.id, { nome, valor, dia });
+    } else if (mudou){
+      d.versoes = (d.versoes || []).filter(v => v.desde < k).concat([{ desde:k, nome, valor, dia }]);
+      if (c.ajustado) setAjuste(k, d.id, null);
+    }
+    salvarDefs(defs);
+    toast(mudou && escopo === "so" ? "Valor alterado só em " + mesK : "Conta atualizada");
+  }, isNew ? null : async () => {
+    const defs = clone(perfil.defs || []);
+    if (tipo0 === "unica"){
+      if (!confirm("Excluir “" + c.nome + "”?")) return false;
+      salvarDefs(defs.filter(x => x.id !== def.id)); toast("Conta excluída"); return;
+    }
+    const ch = await choose("Excluir “" + c.nome + "”", "De quais meses você quer remover esta conta?", [
+      ["so", "Só de " + mesK],
+      ["diante", "De " + mesK + " em diante"],
+      ["todos", "De todos os meses", "danger"]
+    ]);
+    if (!ch) return false;
+    if (ch === "so"){ setAjuste(k, def.id, { removida:true }); toast("Removida só de " + mesK); return; }
+    const d = defs.find(x => x.id === def.id);
+    if (ch === "diante"){
+      d.fim = addMonths(k, -1);
+      salvarDefs(d.fim < d.inicio ? defs.filter(x => x.id !== def.id) : defs);
+      toast("Removida de " + mesK + " em diante"); return;
+    }
+    salvarDefs(defs.filter(x => x.id !== def.id)); toast("Conta excluída de todos os meses");
   });
 }
 
@@ -903,6 +1287,7 @@ function openGanho(g){
     }
     toast("Ganho atualizado");
   }, ()=>{
+    if (!confirm("Excluir este ganho?")) return false;
     setGanhos(oldK, clone(mesView(oldK).ganhos).filter(x=>x.id!==g.id)); toast("Ganho excluído");
   });
 }
@@ -928,16 +1313,19 @@ $("quickForm").addEventListener("submit", e=>{
   $("qValor").value = ""; $("qGastos").value = ""; $("qHoras").value = "";
   toast("Ganho salvo: " + fmt2(valor));
 });
-$("addConta").onclick = ()=>openConta(null);
+$("addConta").onclick = ()=>openConta(contasK, null);
+$("cPrev").onclick = ()=>{ contasK = addMonths(contasK,-1); renderContas(); };
+$("cNext").onclick = ()=>{ contasK = addMonths(contasK, 1); renderContas(); };
+$("cHoje").onclick = ()=>{ contasK = curKey(); renderContas(); };
 $("cfgMargem").addEventListener("change", ()=>{
   let v = parseInt($("cfgMargem").value,10); if (!(v>=0)) v = 0; if (v>100) v = 100;
-  salvarCfg({ ...mesView(curKey()).cfg, margem: v });
+  salvarCfg({ ...perfil.cfg, margem: v });
 });
 $("prevMonth").onclick = ()=>{ histM--; if (histM<0){ histM=11; histY--; } renderHist(); };
 $("nextMonth").onclick = ()=>{ histM++; if (histM>11){ histM=0; histY++; } renderHist(); };
 
 $("exportBtn").onclick = ()=>{
-  const data = { versao: 2, exportadoEm: new Date().toISOString(), perfil, meses };
+  const data = { versao: 3, exportadoEm: new Date().toISOString(), perfil, meses };
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
   a.download = "meta-motorista-backup-" + keyOf(new Date()) + ".json";
@@ -969,7 +1357,7 @@ window.addEventListener("offline", ()=>setStatus("Sem internet, salvo no aparelh
 document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) renderAll(); });
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", ()=>perfil && renderHist());
 
-const now0 = new Date(); histY = now0.getFullYear(); histM = now0.getMonth();
+const now0 = new Date(); histY = now0.getFullYear(); histM = now0.getMonth(); contasK = curKey();
 try { const t = sessionStorage.getItem("mm-tab"); if (["hoje","contas","historico"].includes(t)) currentTab = t; } catch(e){}
 </script>
 </body>

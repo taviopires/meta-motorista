@@ -5,7 +5,10 @@ Aplicação web para motoristas de aplicativo calcularem quanto precisam ganhar 
 ## Funcionalidades
 
 - Login com Google ou e-mail e senha
-- Contas mensais com vencimento, e metas mensal, semanal e diária
+- Contas de todo mês, parceladas (com fim automático) ou de um mês só
+- Planejamento de meses futuros e ajuste de valor em um mês específico
+- Marcar contas como pagas, com resumo do que falta pagar
+- Metas mensal, semanal e diária
 - Meta do dia recalculada conforme o que você já ganhou
 - Registro de ganhos (bruto, gastos e horas)
 - Cada mês guarda suas próprias contas: mudar as contas não altera o histórico
@@ -15,9 +18,11 @@ Aplicação web para motoristas de aplicativo calcularem quanto precisam ganhar 
 ## Estrutura dos dados (Firestore)
 
 ```
-usuarios/{uid}                 → cfg (dias de trabalho, margem) e contasPadrao
-usuarios/{uid}/meses/{AAAA-MM} → contas, cfg e ganhos daquele mês
+usuarios/{uid}                 → cfg (dias de trabalho, margem), defs (contas) e migradoEm
+usuarios/{uid}/meses/{AAAA-MM} → ganhos, pagas, ajustes e cfg daquele mês
 ```
+
+Cada conta em `defs` tem um tipo (`mensal`, `parcelada` ou `unica`), o mês de início, o mês de fim (quando houver) e um histórico de valores. As contas de cada mês são montadas a partir dessas definições, somando os ajustes daquele mês. Meses registrados antes dessa organização (anteriores a `migradoEm`) mantêm o retrato salvo em `contas`.
 
 ## Configurar o Firebase (uma vez)
 
