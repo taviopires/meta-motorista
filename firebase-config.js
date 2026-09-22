@@ -1,4 +1,4 @@
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyAOeA1sPqlrUdNS1mf6130LaiRC65mPfY0",
   authDomain: "uber-app-95609.firebaseapp.com",
   projectId: "uber-app-95609",
