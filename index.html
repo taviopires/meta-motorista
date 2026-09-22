@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meta do Motorista</title>
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Controle de metas e ganhos para motoristas de aplicativo.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meta">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#F3F3F3; --ink:#000000; --muted:#5E5E5E; --line:#E8E8E8;
+  --primary:#000000; --on-primary:#FFFFFF;
+  --hero:#000000; --on-hero:#FFFFFF; --hero-muted:#A6A6A6; --hero-line:#2B2B2B;
+  --sign:#000000;            /* barras do gráfico */
+  --lane:#FFC043;            /* linha da meta */
+  --track:#EEEEEE; --fill:#000000;
+  --good:#0E8345; --warn:#D83A2E; --field:#F3F3F3;
+  --font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --cond:"Inter Tight","Inter",system-ui,-apple-system,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --surface:#141414; --surface-2:#1F1F1F; --ink:#FFFFFF; --muted:#A6A6A6; --line:#2A2A2A;
+    --primary:#FFFFFF; --on-primary:#000000;
+    --hero:#1C1C1C; --on-hero:#FFFFFF; --hero-muted:#A6A6A6; --hero-line:#333333;
+    --sign:#FFFFFF; --lane:#FFC043; --track:#2A2A2A; --fill:#FFFFFF;
+    --good:#3AC47D; --warn:#FF6B5E; --field:#1F1F1F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --surface:#141414; --surface-2:#1F1F1F; --ink:#FFFFFF; --muted:#A6A6A6; --line:#2A2A2A;
+  --primary:#FFFFFF; --on-primary:#000000;
+  --hero:#1C1C1C; --on-hero:#FFFFFF; --hero-muted:#A6A6A6; --hero-line:#333333;
+  --sign:#FFFFFF; --lane:#FFC043; --track:#2A2A2A; --fill:#FFFFFF;
+  --good:#3AC47D; --warn:#FF6B5E; --field:#1F1F1F;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3,h4{font-family:var(--cond);letter-spacing:-.02em}
+.wrap{max-width:960px;margin:0 auto;padding:12px 16px 112px}
+
+/* Topo */
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 18px}
+.brand{font-family:var(--cond);font-weight:800;font-size:1.3rem;letter-spacing:-.03em}
+.userbox{display:flex;align-items:center;gap:10px}
+.status{font-size:.8rem;color:var(--muted);font-weight:500}
+
+/* Navegação */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bg);border-top:1px solid var(--line);
+  display:flex;justify-content:center;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px))}
+nav.tabs .inner{display:flex;gap:6px;width:100%;max-width:520px}
+nav.tabs button{flex:1;white-space:nowrap;background:none;border:0;border-radius:999px;padding:11px 6px;font-weight:600;font-size:.92rem;color:var(--muted);cursor:pointer;transition:background .15s,color .15s}
+nav.tabs button[aria-selected="true"]{background:var(--primary);color:var(--on-primary)}
+@media (min-width:860px){
+  nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);bottom:auto;border-top:0;border-bottom:1px solid var(--line);padding:10px 16px}
+  nav.tabs .inner{max-width:960px;justify-content:flex-start}
+  nav.tabs button{flex:0 0 auto;padding:10px 20px}
+  .wrap{padding-bottom:48px}
+}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--lane);outline-offset:2px}
+
+/* Destaque principal */
+.sign{background:var(--hero);color:var(--on-hero);border-radius:16px}
+.sign-inner{padding:22px 22px 20px}
+.sign-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sign-label{font-weight:600;font-size:1rem}
+.sign-arrow{font-size:.88rem;color:var(--hero-muted)}
+.sign-big{font-family:var(--cond);font-weight:800;font-size:clamp(3rem,13vw,5.2rem);line-height:1;letter-spacing:-.04em;margin:14px 0 10px;font-variant-numeric:tabular-nums}
+.sign-sub{font-size:.95rem;color:var(--hero-muted);max-width:56ch}
+.sign hr{border:0;border-top:1px solid var(--hero-line);margin:20px 0 16px}
+.sign-split{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:end}
+.sign-split small{display:block;font-size:.78rem;color:var(--hero-muted);font-weight:500;margin-bottom:2px}
+.sign-split b{font-family:var(--cond);font-size:1.3rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+/* Progresso do mês */
+.road-block{margin:28px 0 8px}
+.road-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:12px}
+.road-head h2{margin:0;font-size:1.25rem;text-transform:none}
+.road-head span{font-family:var(--cond);font-weight:700;font-size:1.05rem;white-space:nowrap}
+.road{position:relative;height:10px;background:var(--track);border-radius:999px;overflow:visible}
+.road .fill{position:absolute;left:0;top:0;bottom:0;background:var(--fill);border-radius:999px;transition:width .6s ease}
+.road .marker{position:absolute;top:-6px;bottom:-6px;width:3px;margin-left:-1.5px;background:var(--lane);border-radius:2px}
+.road-legend{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);margin-top:12px;gap:8px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){.road .fill{transition:none}}
+
+/* Blocos */
+.grid{display:grid;gap:16px;margin-top:24px}
+@media (min-width:860px){.grid.two{grid-template-columns:1fr 1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel h2,.panel h3{margin:0 0 14px;font-size:1.2rem}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.stat small{display:block;color:var(--muted);font-size:.82rem;font-weight:500}
+.stat b{font-family:var(--cond);font-size:1.55rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.pos{color:var(--good)} .neg{color:var(--warn)}
+.note{color:var(--muted);font-size:.9rem;margin:14px 0 0}
+
+/* Formulários */
+form .fields,.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end}
+.full{grid-column:1/-1}
+label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px}
+label .opt{font-weight:400;color:var(--muted)}
+input[type=text],input[type=date],input[type=number],input[type=email],input[type=password],select{
+  width:100%;padding:12px 14px;border:2px solid transparent;border-radius:10px;background:var(--field);font-size:1rem;height:50px;transition:border-color .15s}
+input:focus{border-color:var(--ink);outline:none}
+input:focus-visible{outline:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:13px 20px;font-weight:600;cursor:pointer;min-height:50px;transition:opacity .15s,background .15s}
+.btn:active{opacity:.8}
+.btn.primary{background:var(--primary);color:var(--on-primary)}
+.btn.ghost{background:var(--surface-2);color:var(--ink)}
+.btn.danger{background:transparent;color:var(--warn)}
+.btn.small{padding:7px 14px;min-height:36px;font-size:.85rem;border-radius:999px}
+.btn.google{width:100%;background:var(--surface-2);margin-top:12px}
+.btn.linklike{background:none;color:var(--muted);text-decoration:underline;padding-left:4px;padding-right:4px}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+#quickForm .btn.primary{width:100%}
+.hint{font-size:.83rem;color:var(--muted);margin-top:8px}
+
+/* Listas */
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.list .main{flex:1;min-width:0}
+.list .main strong{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list .main span{font-size:.83rem;color:var(--muted)}
+.list .val{font-family:var(--cond);font-weight:700;font-size:1.1rem;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.empty{color:var(--muted);padding:12px 0}
+.total-row{display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid var(--ink);padding-top:12px;margin-top:4px;font-family:var(--cond);font-weight:800;font-size:1.25rem;letter-spacing:-.02em}
+
+/* Metas */
+.targets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.targets div{padding:16px 12px;background:var(--surface-2);border-radius:12px}
+.targets div:first-child{background:var(--primary);color:var(--on-primary)}
+.targets div:first-child small{color:inherit;opacity:.7}
+.targets small{display:block;color:var(--muted);font-size:.82rem;font-weight:500}
+.targets b{font-family:var(--cond);font-size:clamp(1.15rem,5vw,1.7rem);font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+
+/* Dias da semana */
+.daypicks{display:flex;gap:6px;flex-wrap:wrap}
+.daypicks label{margin:0}
+.daypicks input{position:absolute;opacity:0;pointer-events:none}
+.daypicks span{display:inline-block;min-width:50px;text-align:center;padding:9px 10px;border-radius:999px;font-weight:600;font-size:.9rem;cursor:pointer;background:var(--surface-2)}
+.daypicks input:checked+span{background:var(--primary);color:var(--on-primary)}
+.daypicks input:focus-visible+span{outline:3px solid var(--lane);outline-offset:2px}
+
+/* Histórico */
+.monthbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+.monthbar h2{margin:0;font-size:1.35rem;text-transform:capitalize}
+.chart-wrap{overflow-x:auto}
+.chart-wrap svg{display:block;min-width:560px;width:100%;height:auto}
+.day-group h4{margin:18px 0 2px;font-size:.88rem;color:var(--muted);font-family:var(--font);font-weight:600;letter-spacing:0;text-transform:capitalize}
+
+/* Diálogo */
+dialog{border:0;border-radius:18px;padding:0;width:min(520px,calc(100% - 24px));background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog form{padding:22px}
+dialog h3{margin:0 0 16px;font-size:1.35rem}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--primary);color:var(--on-primary);
+  padding:12px 18px;border-radius:999px;font-weight:600;font-size:.92rem;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s;white-space:nowrap}
+.toast.show{opacity:1}
+@media (min-width:860px){.toast{bottom:28px}}
+
+/* Login e erros */
+.login{max-width:440px;margin:24px auto 0;border:0;padding:4px}
+.login h1{font-size:2rem;font-weight:800;margin:0 0 8px;line-height:1.1}
+.or{text-align:center;color:var(--muted);font-size:.85rem;margin:20px 0 14px}
+code{background:var(--surface-2);padding:1px 6px;border-radius:6px;font-size:.9em}
+.erro-box{background:var(--surface-2);border-radius:10px;padding:12px;white-space:pre-wrap;word-break:break-word;font-size:.86rem;color:var(--warn)}
+.erro-list{padding-left:20px;margin:6px 0 0}.erro-list li{margin-bottom:8px}
+.wide{display:none}
+@media (min-width:480px){.wide{display:inline}}
+[hidden]{display:none!important}
+</style>
+
+</head>
+<body>
+<nav class="tabs" aria-label="Seções" id="nav" hidden>
+  <div class="inner" role="tablist">
+    <button role="tab" data-view="hoje" aria-selected="true">Hoje</button>
+    <button role="tab" data-view="contas" aria-selected="false">Contas<span class="wide"> e metas</span></button>
+    <button role="tab" data-view="historico" aria-selected="false">Histórico</button>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Meta do Motorista</div>
+    <div class="userbox">
+      <span class="status" id="status">Carregando…</span>
+      <button class="btn ghost small" id="btnSair" type="button" hidden>Sair</button>
+    </div>
+  </header>
+
+  <!-- CONFIGURAÇÃO PENDENTE -->
+  <section id="view-setup" hidden>
+    <div class="panel login">
+      <h1>Falta conectar ao Firebase</h1>
+      <p>Abra o arquivo <code>firebase-config.js</code> e cole as configurações do seu projeto Firebase. O passo a passo está no <code>README.md</code>.</p>
+    </div>
+  </section>
+
+  <!-- ERRO AO CARREGAR -->
+  <section id="view-erro" hidden>
+    <div class="panel login">
+      <h1>O app não conseguiu carregar</h1>
+      <p class="note" style="margin-top:0">Detalhe do erro:</p>
+      <pre id="erroMsg" class="erro-box"></pre>
+      <p><strong>Causas mais comuns:</strong></p>
+      <ul class="erro-list">
+        <li>O <code>firebase-config.js</code> foi colado com o código completo do Firebase. Ele deve ter só o bloco <code>export const firebaseConfig = { ... };</code>, sem linhas de <code>import</code> nem <code>initializeApp</code>.</li>
+        <li>O arquivo foi aberto com clique duplo. Abra pelo <strong>Go Live</strong> do VS Code.</li>
+        <li>Sem internet no momento.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- LOGIN -->
+  <section id="view-login" hidden>
+    <div class="panel login">
+      <h1>Entre para ver suas metas</h1>
+      <p class="note" style="margin-top:0">Seus dados ficam salvos na nuvem, mês a mês, e aparecem em qualquer aparelho em que você entrar.</p>
+      <button class="btn google" id="btnGoogle" type="button">Entrar com Google</button>
+      <div class="or">ou use e-mail e senha</div>
+      <form id="emailForm" autocomplete="on">
+        <div class="fields">
+          <div class="full"><label for="lEmail">E-mail</label><input type="email" id="lEmail" autocomplete="email" required></div>
+          <div class="full"><label for="lSenha">Senha</label><input type="password" id="lSenha" autocomplete="current-password" minlength="6" required></div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" type="submit">Entrar</button>
+          <button class="btn ghost" type="button" id="btnCriar">Criar conta</button>
+          <button class="btn linklike" type="button" id="btnReset">Esqueci a senha</button>
+        </div>
+      </form>
+      <p class="hint" id="loginMsg" role="alert"></p>
+    </div>
+  </section>
+
+  <!-- HOJE -->
+  <section id="view-hoje" hidden>
+    <div class="sign" aria-live="polite">
+      <div class="sign-inner">
+        <div class="sign-row">
+          <span class="sign-label" id="signLabel">Meta de hoje</span>
+          <span class="sign-arrow" id="signDate"></span>
+        </div>
+        <div class="sign-big" id="signBig">R$ 0</div>
+        <div class="sign-sub" id="signSub"></div>
+        <hr>
+        <div class="sign-split">
+          <div><small>Já fez hoje</small><b id="sHoje">R$ 0</b></div>
+          <div><small>Média necessária</small><b id="sMedia">R$ 0</b></div>
+          <div><small>Dias restantes</small><b id="sDias">0</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="road-block">
+      <div class="road-head"><h2 id="roadTitle">Mês</h2><span id="roadPct">0%</span></div>
+      <div class="road" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="road">
+        <div class="fill" id="roadFill" style="width:0%"></div>
+        <div class="marker" id="roadMarker" title="Onde você deveria estar hoje"></div>
+      </div>
+      <div class="road-legend">
+        <span id="roadLeft"></span><span id="roadExpected"></span><span id="roadRight"></span>
+      </div>
+    </div>
+
+    <div class="grid two">
+      <div class="panel">
+        <h2>Registrar ganho</h2>
+        <form id="quickForm" autocomplete="off">
+          <div class="fields">
+            <div><label for="qData">Dia</label><input type="date" id="qData" required></div>
+            <div><label for="qValor">Ganho bruto</label><input type="text" inputmode="decimal" id="qValor" placeholder="R$ 0,00" required></div>
+            <div><label for="qGastos">Gastos <span class="opt">(opcional)</span></label><input type="text" inputmode="decimal" id="qGastos" placeholder="combustível, etc."></div>
+            <div><label for="qHoras">Horas <span class="opt">(opcional)</span></label><input type="text" inputmode="decimal" id="qHoras" placeholder="0"></div>
+          </div>
+          <div class="actions"><button class="btn primary" type="submit">Salvar ganho</button></div>
+          <p class="hint">Conta o valor líquido (ganho − gastos). Pode registrar mais de uma vez no mesmo dia, os valores se somam.</p>
+        </form>
+      </div>
+      <div class="panel">
+        <h2>Resumo do mês</h2>
+        <div class="stats">
+          <div class="stat"><small>Ganho líquido</small><b id="mGanho">R$ 0</b></div>
+          <div class="stat"><small>Falta para a meta</small><b id="mFalta">R$ 0</b></div>
+          <div class="stat"><small>Esta semana</small><b id="mSemana">R$ 0</b></div>
+          <div class="stat"><small>Meta da semana</small><b id="mSemanaMeta">R$ 0</b></div>
+          <div class="stat"><small>Média por dia rodado</small><b id="mMediaReal">R$ 0</b></div>
+          <div class="stat"><small>Ganho por hora</small><b id="mHora">–</b></div>
+        </div>
+        <p class="note" id="mNote"></p>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px" id="dueBox">
+      <h2>Próximos vencimentos</h2>
+      <ul class="list" id="dueList"></ul>
+    </div>
+  </section>
+
+  <!-- CONTAS -->
+  <section id="view-contas" hidden>
+    <div class="panel">
+      <h2 id="tTitle">Quanto você precisa ganhar</h2>
+      <div class="targets">
+        <div><small>Por mês</small><b id="tMes">R$ 0</b></div>
+        <div><small>Por semana</small><b id="tSemana">R$ 0</b></div>
+        <div><small>Por dia</small><b id="tDia">R$ 0</b></div>
+      </div>
+      <p class="note" id="tNote"></p>
+    </div>
+    <div class="grid two">
+      <div class="panel">
+        <h2>Contas e despesas mensais</h2>
+        <ul class="list" id="contasList"></ul>
+        <div class="total-row"><span>Total</span><span id="contasTotal">R$ 0</span></div>
+        <div class="actions"><button class="btn primary" id="addConta" type="button">Adicionar conta</button></div>
+        <p class="hint">Mudanças valem para este mês e os próximos. Os meses anteriores ficam como estavam no histórico.</p>
+      </div>
+      <div class="panel">
+        <h2>Como você trabalha</h2>
+        <label>Dias em que você roda</label>
+        <div class="daypicks" id="dayPicks"></div>
+        <div style="margin-top:16px">
+          <label for="cfgMargem">Margem de segurança (%)</label>
+          <input type="number" id="cfgMargem" min="0" max="100" step="1" inputmode="numeric">
+          <p class="hint">Um valor extra sobre as contas para imprevistos. Ex.: 10% sobre R$ 3.000 dá meta de R$ 3.300.</p>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h2>Backup dos dados</h2>
+      <p class="note" style="margin-top:0">Seus dados já ficam na nuvem. O backup é uma cópia extra em arquivo, e também serve para trazer dados da versão antiga do app.</p>
+      <div class="actions">
+        <button class="btn primary" id="exportBtn" type="button">Exportar backup</button>
+        <button class="btn ghost" id="importBtn" type="button">Importar backup</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTÓRICO -->
+  <section id="view-historico" hidden>
+    <div class="panel">
+      <div class="monthbar">
+        <button class="btn ghost small" id="prevMonth" type="button" aria-label="Mês anterior">‹ Anterior</button>
+        <h2 id="histMonth"></h2>
+        <button class="btn ghost small" id="nextMonth" type="button" aria-label="Próximo mês">Próximo ›</button>
+      </div>
+      <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:14px">
+        <div class="stat"><small>Ganho líquido</small><b id="hGanho">R$ 0</b></div>
+        <div class="stat"><small>Meta</small><b id="hMeta">R$ 0</b></div>
+        <div class="stat"><small>Resultado</small><b id="hRes">R$ 0</b></div>
+      </div>
+      <div class="chart-wrap" id="chart"></div>
+      <p class="hint" id="hHint">Barras: ganho líquido por dia. Linha amarela: meta diária daquele mês.</p>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h2>Lançamentos</h2>
+      <div id="histList"></div>
+    </div>
+  </section>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog" id="dlgForm" autocomplete="off">
+    <h3 id="dlgTitle"></h3>
+    <div class="fields" id="dlgFields"></div>
+    <div class="actions">
+      <button class="btn primary" value="save" type="submit">Salvar</button>
+      <button class="btn ghost" value="cancel" type="button" id="dlgCancel">Cancelar</button>
+      <button class="btn danger" value="delete" type="button" id="dlgDelete" style="margin-left:auto">Excluir</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
+<script>
+  window.__mmBoot = false;
+  function mmFail(msg){
+    if (window.__mmBoot) return;
+    ["setup","login","hoje","contas","historico"].forEach(function(v){ var el=document.getElementById("view-"+v); if(el) el.hidden=true; });
+    document.getElementById("view-erro").hidden = false;
+    document.getElementById("erroMsg").textContent = msg;
+    document.getElementById("status").textContent = "";
+  }
+  window.addEventListener("error", function(e){ mmFail(e.message || "Erro desconhecido ao carregar o app."); });
+  window.addEventListener("unhandledrejection", function(e){ var r=e.reason; mmFail((r && (r.code || r.message)) ? ((r.code?r.code+": ":"") + (r.message||"")) : String(r)); });
+  if (location.protocol === "file:") mmFail("O arquivo foi aberto direto do computador (file://). Abra pelo Go Live do VS Code.");
+  setTimeout(function(){ mmFail("O app não terminou de carregar em 10 segundos. Provavelmente o firebase-config.js está em formato errado, ou não há conexão com a internet."); }, 10000);
+</script>
+<script type="module">
+import { firebaseConfig } from "./firebase-config.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
+  createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc, onSnapshot,
+  collection, writeBatch, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ================= Utilidades =================
+const $ = id => document.getElementById(id);
+const clone = o => JSON.parse(JSON.stringify(o));
+const uidGen = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const pad = n => String(n).padStart(2,"0");
+const keyOf = d => d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const mk = (y,m) => y+"-"+pad(m+1);
+const curKey = () => { const d = new Date(); return mk(d.getFullYear(), d.getMonth()); };
+const fromKey = k => { const [y,m,d] = k.split("-").map(Number); return new Date(y,m-1,d); };
+const monthName = (y,m) => new Date(y,m,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+const DOW = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+const brl = new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
+const brl2 = new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt = v => brl.format(Math.round(v || 0));
+const fmt2 = v => brl2.format(v || 0);
+function parseNum(s){
+  if (s == null) return 0;
+  s = String(s).trim().replace(/\s|R\$/g,"");
+  if (!s) return 0;
+  if (s.includes(",")) s = s.replace(/\./g,"").replace(",",".");
+  const n = parseFloat(s); return isFinite(n) ? n : 0;
+}
+const numToInput = n => n ? String(n).replace(".",",") : "";
+let toastT;
+function toast(t){ const el=$("toast"); el.textContent=t; el.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2400); }
+function setStatus(t){ $("status").textContent = t; }
+
+function showOnly(view){
+  ["setup","login","hoje","contas","historico"].forEach(v => $("view-"+v).hidden = v !== view);
+}
+
+// ================= Firebase =================
+if (!firebaseConfig || !firebaseConfig.apiKey || /COLE/i.test(firebaseConfig.apiKey)){
+  window.__mmBoot = true;
+  showOnly("setup"); setStatus("");
+  throw new Error("Configure o firebase-config.js");
+}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+auth.languageCode = "pt";
+const db = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+
+// ================= Estado =================
+const DEF_CFG = { dias:[1,2,3,4,5,6], margem:0 };
+const LEGACY_KEY = "meta-motorista-v1";
+let uid = null, perfil = null, meses = {}, unsubs = [];
+let perfilReady = false, mesesReady = false, initingPerfil = false;
+const creating = {};
+let histY, histM, currentTab = "hoje";
+
+const perfilRef = () => doc(db, "usuarios", uid);
+const mesRef = k => doc(db, "usuarios", uid, "meses", k);
+const mesesCol = () => collection(db, "usuarios", uid, "meses");
+
+function normCfg(c){ const r = Object.assign(clone(DEF_CFG), c || {}); if (!Array.isArray(r.dias) || !r.dias.length) r.dias = DEF_CFG.dias.slice(); r.margem = Number(r.margem)||0; return r; }
+function normPerfil(d){ d = d || {}; return { cfg: normCfg(d.cfg), contasPadrao: Array.isArray(d.contasPadrao) ? d.contasPadrao : [] }; }
+function normMes(d){ d = d || {}; return { contas: Array.isArray(d.contas) ? d.contas : [], cfg: normCfg(d.cfg), ganhos: Array.isArray(d.ganhos) ? d.ganhos : [] }; }
+// Mês para exibir: o salvo, ou um "virtual" baseado nas contas atuais
+function mesView(k){
+  if (meses[k]) return meses[k];
+  return { contas: perfil ? perfil.contasPadrao : [], cfg: perfil ? perfil.cfg : normCfg(), ganhos: [], virtual: true };
+}
+
+// ================= Cálculos =================
+const totalContas = md => md.contas.reduce((a,c)=>a+(Number(c.valor)||0),0);
+const metaMensal = md => totalContas(md) * (1 + (Number(md.cfg.margem)||0)/100);
+const isWorkDay = (md,d) => md.cfg.dias.includes(d.getDay());
+const daysInMonth = (y,m) => new Date(y,m+1,0).getDate();
+function workDaysFrom(md,y,m,from){ let n=0; for(let i=from;i<=daysInMonth(y,m);i++) if(isWorkDay(md,new Date(y,m,i))) n++; return n; }
+const workDaysInMonth = (md,y,m) => workDaysFrom(md,y,m,1);
+const liquido = g => (Number(g.valor)||0) - (Number(g.gastos)||0);
+function somaDia(k){ const md = meses[k.slice(0,7)]; return md ? md.ganhos.filter(g=>g.data===k).reduce((a,g)=>a+liquido(g),0) : 0; }
+function metaDiariaBase(md,y,m){ const w = workDaysInMonth(md,y,m); return w ? metaMensal(md)/w : 0; }
+const metaSemanal = (md,y,m) => metaDiariaBase(md,y,m) * md.cfg.dias.length;
+
+// ================= Escrita na nuvem =================
+function w(p){ p.catch(e => { console.error(e); toast("Não foi possível salvar: " + (e.code || "erro")); }); }
+function salvarContas(contas){
+  const k = curKey();
+  w(setDoc(mesRef(k), { contas }, { merge:true }));
+  w(setDoc(perfilRef(), { contasPadrao: contas }, { merge:true }));
+}
+function salvarCfg(cfg){
+  const k = curKey();
+  w(setDoc(mesRef(k), { cfg }, { merge:true }));
+  w(setDoc(perfilRef(), { cfg }, { merge:true }));
+}
+function addGanho(g){
+  const k = g.data.slice(0,7);
+  const data = { ganhos: arrayUnion(g) };
+  if (!meses[k]){ data.contas = perfil.contasPadrao; data.cfg = perfil.cfg; }
+  w(setDoc(mesRef(k), data, { merge:true }));
+}
+function setGanhos(k, ganhos){ w(setDoc(mesRef(k), { ganhos }, { merge:true })); }
+
+function importar(d){
+  const batch = writeBatch(db);
+  if (d && d.versao === 2){
+    batch.set(perfilRef(), normPerfil(d.perfil));
+    Object.entries(d.meses || {}).forEach(([k,v]) => { if (/^\d{4}-\d{2}$/.test(k)) batch.set(mesRef(k), normMes(v)); });
+  } else {
+    const cfg = normCfg(d.cfg), contas = Array.isArray(d.contas) ? d.contas : [];
+    batch.set(perfilRef(), { cfg, contasPadrao: contas });
+    const by = {};
+    (d.ganhos || []).forEach(g => { if (g && g.data) (by[g.data.slice(0,7)] ||= []).push(g); });
+    by[curKey()] ||= [];
+    Object.entries(by).forEach(([k,gs]) => batch.set(mesRef(k), { contas, cfg, ganhos: gs }));
+  }
+  return batch.commit();
+}
+
+// ================= Login =================
+const MSG = {
+  "auth/invalid-credential":"E-mail ou senha incorretos.",
+  "auth/invalid-email":"E-mail inválido.",
+  "auth/user-not-found":"Não existe conta com esse e-mail.",
+  "auth/wrong-password":"Senha incorreta.",
+  "auth/email-already-in-use":"Já existe uma conta com esse e-mail. Use Entrar.",
+  "auth/weak-password":"A senha precisa ter pelo menos 6 caracteres.",
+  "auth/popup-closed-by-user":"A janela de login foi fechada antes de terminar.",
+  "auth/popup-blocked":"O navegador bloqueou a janela de login. Libere pop-ups para este site.",
+  "auth/unauthorized-domain":"Este endereço não está autorizado no Firebase (Authentication → Settings → Authorized domains).",
+  "auth/network-request-failed":"Sem conexão com a internet.",
+  "auth/too-many-requests":"Muitas tentativas. Espere alguns minutos."
+};
+const loginErr = e => { $("loginMsg").textContent = MSG[e.code] || ("Erro: " + (e.code || e.message)); };
+$("btnGoogle").onclick = () => { $("loginMsg").textContent=""; signInWithPopup(auth, new GoogleAuthProvider()).catch(loginErr); };
+$("emailForm").addEventListener("submit", e => {
+  e.preventDefault(); $("loginMsg").textContent="";
+  signInWithEmailAndPassword(auth, $("lEmail").value.trim(), $("lSenha").value).catch(loginErr);
+});
+$("btnCriar").onclick = () => {
+  const em = $("lEmail").value.trim(), pw = $("lSenha").value;
+  if (!em || pw.length < 6){ $("loginMsg").textContent = "Preencha o e-mail e uma senha com pelo menos 6 caracteres."; return; }
+  createUserWithEmailAndPassword(auth, em, pw).catch(loginErr);
+};
+$("btnReset").onclick = () => {
+  const em = $("lEmail").value.trim();
+  if (!em){ $("loginMsg").textContent = "Digite seu e-mail acima e toque de novo em Esqueci a senha."; return; }
+  sendPasswordResetEmail(auth, em).then(()=>{ $("loginMsg").textContent = "Enviamos um link para redefinir a senha no seu e-mail."; }).catch(loginErr);
+};
+$("btnSair").onclick = () => { if (confirm("Sair da sua conta neste aparelho?")) signOut(auth); };
+
+onAuthStateChanged(auth, user => {
+  window.__mmBoot = true;
+  unsubs.forEach(u => u()); unsubs = [];
+  uid = null; perfil = null; meses = {}; perfilReady = mesesReady = false; initingPerfil = false;
+  if (!user){
+    $("nav").hidden = true; $("btnSair").hidden = true;
+    showOnly("login"); setStatus(""); return;
+  }
+  uid = user.uid;
+  $("nav").hidden = false; $("btnSair").hidden = false;
+  setStatus("Sincronizando…");
+  selectTab(currentTab);
+
+  unsubs.push(onSnapshot(perfilRef(), { includeMetadataChanges:true }, snap => {
+    if (!snap.exists()){
+      if (!snap.metadata.fromCache && !initingPerfil) initPerfil();
+      return;
+    }
+    perfil = normPerfil(snap.data()); perfilReady = true;
+    syncStatus(snap.metadata); afterLoad();
+  }, e => { console.error(e); setStatus("Erro de acesso ao banco"); toast("Verifique as regras do Firestore (README)."); }));
+
+  unsubs.push(onSnapshot(mesesCol(), { includeMetadataChanges:true }, snap => {
+    const m = {}; snap.forEach(d => { m[d.id] = normMes(d.data()); });
+    meses = m; mesesReady = true;
+    syncStatus(snap.metadata); afterLoad();
+  }, e => console.error(e)));
+});
+
+function initPerfil(){
+  initingPerfil = true;
+  let legacy = null;
+  try { const r = localStorage.getItem(LEGACY_KEY); legacy = r ? JSON.parse(r) : null; } catch(e){}
+  if (legacy && (legacy.contas?.length || legacy.ganhos?.length) &&
+      confirm("Encontramos dados da versão antiga salvos neste aparelho. Quer enviar para a nuvem?")){
+    importar(legacy).then(()=>toast("Dados enviados para a nuvem")).catch(e=>toast("Erro ao importar: " + e.code));
+  } else {
+    w(setDoc(perfilRef(), { cfg: normCfg(), contasPadrao: [] }));
+  }
+}
+
+function afterLoad(){
+  if (!perfilReady || !mesesReady) return;
+  const k = curKey();
+  if (!meses[k] && !creating[k]){
+    creating[k] = true;
+    // merge sem "ganhos": nunca apaga lançamentos feitos em outro aparelho
+    w(setDoc(mesRef(k), { contas: perfil.contasPadrao, cfg: perfil.cfg }, { merge:true }));
+  }
+  renderAll();
+}
+
+function syncStatus(meta){
+  if (meta.hasPendingWrites) setStatus(navigator.onLine ? "Salvando…" : "Sem internet, salvo no aparelho");
+  else if (meta.fromCache) setStatus(navigator.onLine ? "Sincronizando…" : "Sem internet");
+  else setStatus("Salvo na nuvem");
+}
+
+// ================= Telas =================
+function renderHoje(){
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth(), today = now.getDate();
+  const md = mesView(mk(y,m));
+  const tKey = keyOf(now);
+  const meta = metaMensal(md);
+  const ganhoMes = md.ganhos.reduce((a,g)=>a+liquido(g),0);
+  const ganhoHoje = somaDia(tKey);
+  const restantes = workDaysFrom(md,y,m,today);
+  const faltaAntes = Math.max(0, meta - (ganhoMes - ganhoHoje));
+  const falta = Math.max(0, meta - ganhoMes);
+  const mediaNec = restantes > 0 ? faltaAntes / restantes : faltaAntes;
+
+  $("signDate").textContent = now.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"short"});
+  $("sHoje").textContent = fmt(ganhoHoje);
+  $("sMedia").textContent = fmt(mediaNec);
+  $("sDias").textContent = restantes;
+
+  if (meta <= 0){
+    $("signLabel").textContent = "Meta de hoje"; $("signBig").textContent = "R$ –";
+    $("signSub").textContent = "Cadastre suas contas em “Contas e metas” para calcular quanto precisa rodar.";
+  } else if (falta <= 0){
+    $("signLabel").textContent = "Meta do mês"; $("signBig").textContent = "Batida";
+    $("signSub").textContent = "Você já cobriu todas as contas do mês. Tudo o que ganhar daqui para frente é sobra: " + fmt(ganhoMes - meta) + " até agora.";
+  } else if (!isWorkDay(md,now) && ganhoHoje === 0){
+    $("signLabel").textContent = "Hoje é folga"; $("signBig").textContent = fmt(mediaNec);
+    $("signSub").textContent = "É a média que você precisa fazer em cada um dos próximos " + restantes + " dias de trabalho. Se rodar hoje, registre e ela diminui.";
+  } else {
+    const faltaHoje = Math.max(0, mediaNec - ganhoHoje);
+    if (faltaHoje <= 0){
+      $("signLabel").textContent = "Meta de hoje"; $("signBig").textContent = "Feita";
+      $("signSub").textContent = "Você passou a meta de hoje em " + fmt(ganhoHoje - mediaNec) + ". Cada real a mais baixa a média dos próximos dias.";
+    } else {
+      $("signLabel").textContent = ganhoHoje > 0 ? "Falta hoje" : "Meta de hoje";
+      $("signBig").textContent = fmt(faltaHoje);
+      $("signSub").textContent = ganhoHoje > 0 ? "Você já fez " + fmt(ganhoHoje) + " de " + fmt(mediaNec) + " hoje."
+        : "Líquido que você precisa fazer hoje para fechar o mês em " + fmt(meta) + ".";
+    }
+  }
+
+  const pct = meta > 0 ? Math.min(100, ganhoMes/meta*100) : 0;
+  const wTotal = workDaysInMonth(md,y,m);
+  const wPassed = wTotal - workDaysFrom(md,y,m,today+1);
+  const esperado = wTotal ? meta * wPassed / wTotal : 0;
+  $("roadTitle").textContent = "Progresso de " + new Date(y,m,1).toLocaleDateString("pt-BR",{month:"long"});
+  $("roadPct").textContent = Math.round(pct) + "% da meta";
+  $("roadFill").style.width = pct + "%";
+  $("roadMarker").style.left = (meta > 0 ? Math.min(100, esperado/meta*100) : 0) + "%";
+  $("road").setAttribute("aria-valuenow", Math.round(pct));
+  $("roadLeft").textContent = fmt(ganhoMes) + " ganhos";
+  $("roadExpected").textContent = "Esperado até hoje: " + fmt(esperado);
+  $("roadRight").textContent = "Meta " + fmt(meta);
+
+  $("mGanho").textContent = fmt(ganhoMes);
+  $("mFalta").textContent = fmt(falta); $("mFalta").className = falta > 0 ? "" : "pos";
+  const dow = (now.getDay()+6)%7;
+  let semana = 0;
+  for (let i=0;i<7;i++) semana += somaDia(keyOf(new Date(y,m,today-dow+i)));
+  const mSem = metaSemanal(md,y,m);
+  $("mSemana").textContent = fmt(semana); $("mSemana").className = mSem > 0 && semana >= mSem ? "pos" : "";
+  $("mSemanaMeta").textContent = fmt(mSem);
+  const diasRodados = new Set(md.ganhos.map(g=>g.data)).size;
+  $("mMediaReal").textContent = diasRodados ? fmt(ganhoMes/diasRodados) : "R$ 0";
+  const comHoras = md.ganhos.filter(g=>Number(g.horas)>0);
+  const horas = comHoras.reduce((a,g)=>a+Number(g.horas),0);
+  $("mHora").textContent = horas > 0 ? fmt2(comHoras.reduce((a,g)=>a+liquido(g),0)/horas) : "–";
+  let note = "";
+  if (meta > 0 && falta > 0){
+    const diff = ganhoMes - esperado;
+    note = diff >= 0 ? "Você está " + fmt(diff) + " à frente do ritmo necessário." : "Você está " + fmt(-diff) + " atrás do ritmo necessário.";
+  }
+  $("mNote").textContent = note;
+
+  const due = md.contas.filter(c=>Number(c.dia)>=1).map(c=>{
+    const d = Number(c.dia);
+    let dt = new Date(y,m,Math.min(d,daysInMonth(y,m)));
+    if (d < today) dt = new Date(y,m+1,Math.min(d,daysInMonth(y,m+1)));
+    return {c,dt};
+  }).sort((a,b)=>a.dt-b.dt).slice(0,4);
+  const ul = $("dueList"); ul.innerHTML = "";
+  $("dueBox").hidden = due.length === 0;
+  due.forEach(({c,dt})=>{
+    const days = Math.round((dt - new Date(y,m,today))/86400000);
+    ul.append(row(c.nome, (days===0?"Vence hoje":days===1?"Vence amanhã":"Vence em "+days+" dias") + " · dia " + c.dia, fmt2(c.valor)));
+  });
+}
+
+function row(title, sub, val, onEdit, label){
+  const li = document.createElement("li");
+  const main = document.createElement("div"); main.className="main";
+  const s = document.createElement("strong"); s.textContent = title;
+  const sp = document.createElement("span"); sp.textContent = sub;
+  main.append(s,sp);
+  const v = document.createElement("span"); v.className="val"; v.textContent = val;
+  li.append(main,v);
+  if (onEdit){
+    const b = document.createElement("button"); b.className="btn ghost small"; b.type="button"; b.textContent="Editar";
+    b.setAttribute("aria-label", "Editar " + (label || title)); b.onclick = onEdit; li.append(b);
+  }
+  return li;
+}
+
+function renderContas(){
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth();
+  const md = mesView(mk(y,m));
+  const ul = $("contasList"); ul.innerHTML = "";
+  if (!md.contas.length){
+    const li = document.createElement("li"); li.className="empty";
+    li.textContent = "Nenhuma conta ainda. Comece por aluguel, luz, água, internet, celular, mercado e os custos do carro.";
+    ul.append(li);
+  }
+  md.contas.slice().sort((a,b)=>(b.valor||0)-(a.valor||0)).forEach(c=>{
+    ul.append(row(c.nome, c.dia ? "Vence dia " + c.dia : "Sem vencimento definido", fmt2(c.valor), ()=>openConta(c)));
+  });
+  $("contasTotal").textContent = fmt2(totalContas(md));
+  $("tTitle").textContent = "Quanto você precisa ganhar em " + new Date(y,m,1).toLocaleDateString("pt-BR",{month:"long"});
+  $("tMes").textContent = fmt(metaMensal(md));
+  $("tSemana").textContent = fmt(metaSemanal(md,y,m));
+  $("tDia").textContent = fmt(metaDiariaBase(md,y,m));
+  $("tNote").textContent = "Este mês tem " + workDaysInMonth(md,y,m) + " dias de trabalho (" + md.cfg.dias.length + " por semana)" +
+    (md.cfg.margem ? ", com " + md.cfg.margem + "% de margem de segurança." : ".") + " Valores líquidos, depois dos gastos do dia.";
+
+  const dp = $("dayPicks");
+  if (!dp.childElementCount){
+    [1,2,3,4,5,6,0].forEach(d=>{
+      const l = document.createElement("label");
+      const i = document.createElement("input"); i.type="checkbox"; i.value=d;
+      i.onchange = ()=>{
+        const sel = [...dp.querySelectorAll("input:checked")].map(x=>Number(x.value));
+        if (!sel.length){ i.checked = true; toast("Escolha pelo menos um dia"); return; }
+        salvarCfg({ ...mesView(curKey()).cfg, dias: sel });
+      };
+      const sp = document.createElement("span"); sp.textContent = DOW[d];
+      l.append(i,sp); dp.append(l);
+    });
+  }
+  dp.querySelectorAll("input").forEach(i=>{ i.checked = md.cfg.dias.includes(Number(i.value)); });
+  if (document.activeElement !== $("cfgMargem")) $("cfgMargem").value = md.cfg.margem || 0;
+}
+
+function renderHist(){
+  const y = histY, m = histM, k = mk(y,m), md = mesView(k);
+  $("histMonth").textContent = monthName(y,m);
+  const total = md.ganhos.reduce((a,g)=>a+liquido(g),0);
+  const meta = metaMensal(md), res = total - meta;
+  $("hGanho").textContent = fmt(total);
+  $("hMeta").textContent = fmt(meta);
+  $("hRes").textContent = (res>=0?"+":"−") + fmt(Math.abs(res));
+  $("hRes").className = res >= 0 ? "pos" : "neg";
+  $("hHint").textContent = md.virtual && k < curKey()
+    ? "Nenhum dado salvo neste mês. A meta mostrada usa as contas atuais."
+    : "Barras: ganho líquido por dia. Linha amarela: meta diária daquele mês.";
+
+  const n = daysInMonth(y,m), W = 720, H = 220, pl = 44, pr = 8, pt = 12, pb = 26;
+  const vals = []; for(let i=1;i<=n;i++) vals.push(somaDia(k+"-"+pad(i)));
+  const mdb = metaDiariaBase(md,y,m);
+  const max = Math.max(mdb*1.25, ...vals, 10);
+  const bw = (W-pl-pr)/n;
+  const yOf = v => pt + (H-pt-pb) * (1 - Math.max(0,v)/max);
+  const css = getComputedStyle(document.documentElement);
+  const cv = n => css.getPropertyValue(n).trim();
+  const [cInk,cBar,cLane,cLine,cGood] = ["--muted","--sign","--lane","--line","--good"].map(cv);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ganhos por dia em ${monthName(y,m)}">`;
+  [0,.5,1].forEach(f=>{
+    const v = max*f, yy = yOf(v);
+    svg += `<line x1="${pl}" x2="${W-pr}" y1="${yy}" y2="${yy}" stroke="${cLine}"/>`;
+    svg += `<text x="${pl-6}" y="${yy+4}" text-anchor="end" font-size="11" fill="${cInk}" font-family="Inter,sans-serif">${Math.round(v)}</text>`;
+  });
+  vals.forEach((v,i)=>{
+    const x = pl + i*bw + bw*.15, wd = bw*.7, d = new Date(y,m,i+1);
+    if (v !== 0){
+      const yy = yOf(v);
+      svg += `<rect x="${x.toFixed(1)}" y="${yy.toFixed(1)}" width="${wd.toFixed(1)}" height="${Math.max(1,(H-pb)-yy).toFixed(1)}" rx="3" fill="${mdb && v>=mdb ? cGood : cBar}"><title>${d.toLocaleDateString("pt-BR")}: ${fmt2(v)}</title></rect>`;
+    } else if (!isWorkDay(md,d)){
+      svg += `<rect x="${x.toFixed(1)}" y="${H-pb-3}" width="${wd.toFixed(1)}" height="3" fill="${cLine}"/>`;
+    }
+    if (i===0 || (i+1)%5===0) svg += `<text x="${(pl+i*bw+bw/2).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="11" fill="${cInk}" font-family="Inter,sans-serif">${i+1}</text>`;
+  });
+  if (mdb > 0) svg += `<line x1="${pl}" x2="${W-pr}" y1="${yOf(mdb)}" y2="${yOf(mdb)}" stroke="${cLane}" stroke-width="2" stroke-dasharray="6 5"/>`;
+  $("chart").innerHTML = svg + `</svg>`;
+
+  const box = $("histList"); box.innerHTML = "";
+  if (!md.ganhos.length){
+    const p = document.createElement("p"); p.className="empty"; p.textContent = "Nenhum ganho registrado neste mês."; box.append(p); return;
+  }
+  const byDay = {};
+  md.ganhos.forEach(g=>{ (byDay[g.data] ||= []).push(g); });
+  Object.keys(byDay).sort().reverse().forEach(dk=>{
+    const grp = document.createElement("div"); grp.className="day-group";
+    const h = document.createElement("h4");
+    h.textContent = fromKey(dk).toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"}) + " · " + fmt2(somaDia(dk));
+    const ul = document.createElement("ul"); ul.className="list";
+    byDay[dk].forEach(g=>{
+      const parts = [];
+      if (Number(g.gastos)) parts.push("gastos " + fmt2(g.gastos));
+      if (Number(g.horas)) parts.push(String(g.horas).replace(".",",") + " h");
+      ul.append(row("Bruto " + fmt2(g.valor), parts.join(" · ") || "sem gastos informados", fmt2(liquido(g)), ()=>openGanho(g), "ganho"));
+    });
+    grp.append(h,ul); box.append(grp);
+  });
+}
+
+function renderAll(){ if (!perfil) return; renderHoje(); renderContas(); renderHist(); }
+
+// ================= Diálogo =================
+const dlg = $("dlg");
+let dlgSave = null, dlgDel = null;
+function field(id,label,value,o={}){
+  const d = document.createElement("div"); if (o.full) d.className="full";
+  const l = document.createElement("label"); l.htmlFor=id; l.textContent = label;
+  if (o.opt){ const s=document.createElement("span"); s.className="opt"; s.textContent=" (opcional)"; l.append(s); }
+  const i = document.createElement("input"); i.id=id; i.type=o.type||"text";
+  if (o.inputmode) i.inputMode = o.inputmode;
+  if (o.placeholder) i.placeholder = o.placeholder;
+  if (o.required) i.required = true;
+  if (o.min!=null) i.min = o.min;
+  if (o.max!=null) i.max = o.max;
+  i.value = value == null ? "" : value;
+  d.append(l,i); return d;
+}
+function openDialog(title, fields, onSave, onDelete){
+  $("dlgTitle").textContent = title;
+  const f = $("dlgFields"); f.innerHTML = ""; fields.forEach(x=>f.append(x));
+  dlgSave = onSave; dlgDel = onDelete; $("dlgDelete").hidden = !onDelete;
+  dlg.showModal(); f.querySelector("input")?.focus();
+}
+$("dlgForm").addEventListener("submit", e=>{ e.preventDefault(); if (dlgSave && dlgSave() !== false) dlg.close(); });
+$("dlgCancel").onclick = ()=>dlg.close();
+$("dlgDelete").onclick = ()=>{ if (dlgDel && confirm("Excluir este item?")){ dlgDel(); dlg.close(); } };
+
+function openConta(c){
+  const isNew = !c;
+  openDialog(isNew ? "Nova conta" : "Editar conta", [
+    field("cNome","Nome", c?.nome, {full:true, required:true, placeholder:"Ex.: aluguel, parcela do carro"}),
+    field("cValor","Valor mensal (R$)", c ? numToInput(c.valor) : "", {inputmode:"decimal", required:true, placeholder:"0,00"}),
+    field("cDia","Dia do vencimento", c?.dia || "", {type:"number", inputmode:"numeric", min:1, max:31, opt:true})
+  ], ()=>{
+    const nome = $("cNome").value.trim(), valor = parseNum($("cValor").value), dia = parseInt($("cDia").value,10);
+    if (!nome){ toast("Informe o nome da conta"); return false; }
+    if (valor <= 0){ toast("Informe um valor maior que zero"); return false; }
+    const obj = { id: c ? c.id : uidGen(), nome, valor, dia: dia>=1 && dia<=31 ? dia : null };
+    const contas = clone(mesView(curKey()).contas);
+    if (isNew) contas.push(obj); else { const i = contas.findIndex(x=>x.id===c.id); if (i>=0) contas[i] = obj; }
+    salvarContas(contas); toast(isNew ? "Conta adicionada" : "Conta atualizada");
+  }, isNew ? null : ()=>{
+    salvarContas(clone(mesView(curKey()).contas).filter(x=>x.id!==c.id)); toast("Conta excluída");
+  });
+}
+
+function openGanho(g){
+  const oldK = g.data.slice(0,7);
+  openDialog("Editar ganho", [
+    field("gData","Dia", g.data, {type:"date", required:true}),
+    field("gValor","Ganho bruto (R$)", numToInput(g.valor), {inputmode:"decimal", required:true}),
+    field("gGastos","Gastos do dia", numToInput(g.gastos), {inputmode:"decimal", opt:true}),
+    field("gHoras","Horas rodadas", numToInput(g.horas), {inputmode:"decimal", opt:true})
+  ], ()=>{
+    const data = $("gData").value, valor = parseNum($("gValor").value);
+    if (!data){ toast("Escolha o dia"); return false; }
+    if (valor <= 0){ toast("Informe um ganho maior que zero"); return false; }
+    const novo = { id: g.id, data, valor, gastos: parseNum($("gGastos").value), horas: parseNum($("gHoras").value) };
+    const newK = data.slice(0,7);
+    const lista = clone(mesView(oldK).ganhos);
+    if (newK === oldK){
+      setGanhos(oldK, lista.map(x => x.id === g.id ? novo : x));
+    } else {
+      setGanhos(oldK, lista.filter(x => x.id !== g.id));
+      addGanho(novo);
+    }
+    toast("Ganho atualizado");
+  }, ()=>{
+    setGanhos(oldK, clone(mesView(oldK).ganhos).filter(x=>x.id!==g.id)); toast("Ganho excluído");
+  });
+}
+
+// ================= Eventos =================
+function selectTab(v){
+  currentTab = v;
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected", x.dataset.view===v ? "true":"false"));
+  showOnly(v);
+  try { sessionStorage.setItem("mm-tab", v); } catch(e){}
+}
+document.querySelectorAll("nav.tabs button").forEach(b=> b.onclick = ()=>{ selectTab(b.dataset.view); window.scrollTo(0,0); });
+
+$("qData").value = keyOf(new Date());
+$("quickForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  if (!perfil){ toast("Aguarde a sincronização terminar"); return; }
+  const data = $("qData").value, valor = parseNum($("qValor").value);
+  if (!data){ toast("Escolha o dia"); return; }
+  if (valor <= 0){ toast("Informe um ganho maior que zero"); $("qValor").focus(); return; }
+  addGanho({ id: uidGen(), data, valor, gastos: parseNum($("qGastos").value), horas: parseNum($("qHoras").value) });
+  $("qValor").value = ""; $("qGastos").value = ""; $("qHoras").value = "";
+  toast("Ganho salvo: " + fmt2(valor));
+});
+$("addConta").onclick = ()=>openConta(null);
+$("cfgMargem").addEventListener("change", ()=>{
+  let v = parseInt($("cfgMargem").value,10); if (!(v>=0)) v = 0; if (v>100) v = 100;
+  salvarCfg({ ...mesView(curKey()).cfg, margem: v });
+});
+$("prevMonth").onclick = ()=>{ histM--; if (histM<0){ histM=11; histY--; } renderHist(); };
+$("nextMonth").onclick = ()=>{ histM++; if (histM>11){ histM=0; histY++; } renderHist(); };
+
+$("exportBtn").onclick = ()=>{
+  const data = { versao: 2, exportadoEm: new Date().toISOString(), perfil, meses };
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+  a.download = "meta-motorista-backup-" + keyOf(new Date()) + ".json";
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  toast("Backup exportado");
+};
+$("importBtn").onclick = ()=>$("importFile").click();
+$("importFile").onchange = e=>{
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try {
+      const d = JSON.parse(r.result);
+      const ok = d && (d.versao === 2 ? typeof d.meses === "object" : Array.isArray(d.contas) && Array.isArray(d.ganhos));
+      if (!ok) throw new Error();
+      if (!confirm("Os meses que estão no backup vão substituir os mesmos meses na nuvem. Continuar?")) return;
+      importar(d).then(()=>toast("Backup importado")).catch(err=>toast("Erro ao importar: " + (err.code||"")));
+    } catch(err){ toast("Arquivo de backup inválido"); }
+    finally { e.target.value = ""; }
+  };
+  r.readAsText(f);
+};
+
+window.addEventListener("online", ()=>setStatus("Sincronizando…"));
+window.addEventListener("offline", ()=>setStatus("Sem internet, salvo no aparelho"));
+document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) renderAll(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", ()=>perfil && renderHist());
+
+const now0 = new Date(); histY = now0.getFullYear(); histM = now0.getMonth();
+try { const t = sessionStorage.getItem("mm-tab"); if (["hoje","contas","historico"].includes(t)) currentTab = t; } catch(e){}
+</script>
+</body>
+</html>
