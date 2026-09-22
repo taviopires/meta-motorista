@@ -254,6 +254,21 @@ dialog .actions .btn.danger{margin-left:auto}
 @media (max-width:399px){ dialog .actions .btn{flex:1 1 auto} dialog .actions .btn.danger{margin-left:0} }
 @media (max-width:399px){ .seg span{font-size:.78rem;padding:4px 2px} dialog form{padding:18px 16px} }
 
+/* Seletor de mês */
+.mpick-label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.mpick-label .seg-label{margin:0}
+.mpick-label .mpick-val{font-size:.85rem;font-weight:600;color:var(--ink)}
+.mpick{background:var(--surface-2);border-radius:12px;padding:8px}
+.mpick-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mpick-head button{width:38px;height:38px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);cursor:pointer;font-size:1.15rem;line-height:1}
+.mpick-year{font-family:var(--cond);font-weight:700;font-size:1.05rem}
+.mpick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.mpick-grid button{border:0;background:transparent;color:var(--ink);border-radius:9px;min-height:42px;font-weight:600;font-size:.9rem;cursor:pointer}
+.mpick-grid button:hover{background:var(--surface)}
+.mpick-grid button.atual{box-shadow:inset 0 0 0 1.5px var(--muted)}
+.mpick-grid button[aria-pressed="true"]{background:var(--primary);color:var(--on-primary);box-shadow:none}
+.mpick-grid button:focus-visible,.mpick-head button:focus-visible{outline:3px solid var(--lane);outline-offset:1px}
+
 [hidden]{display:none!important}
 </style>
 
@@ -502,7 +517,7 @@ dialog .actions .btn.danger{margin-left:auto}
   setTimeout(function(){ mmFail("O app não terminou de carregar em 10 segundos. Provavelmente o firebase-config.js está em formato errado, ou não há conexão com a internet."); }, 10000);
 </script>
 <script type="module">
-import { firebaseConfig } from "./firebase-config.js";
+import { firebaseConfig } from "./firebase-config.js?v=2";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
   createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -1118,6 +1133,42 @@ function segField(name, label, opts, value, onChange){
   d.append(lb, g); return d;
 }
 const segValue = name => (document.querySelector('input[name="' + name + '"]:checked') || {}).value;
+const MES_CURTO = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+function monthPicker(id, label, value){
+  const d = document.createElement("div"); d.className = "full";
+  const head = document.createElement("div"); head.className = "mpick-label";
+  const lb = document.createElement("div"); lb.className = "seg-label"; lb.id = id + "L"; lb.textContent = label;
+  const val = document.createElement("span"); val.className = "mpick-val"; val.setAttribute("aria-live","polite");
+  head.append(lb, val);
+  const hidden = document.createElement("input"); hidden.type = "hidden"; hidden.id = id; hidden.value = value;
+  const box = document.createElement("div"); box.className = "mpick"; box.setAttribute("role","group"); box.setAttribute("aria-labelledby", id + "L");
+  const top = document.createElement("div"); top.className = "mpick-head";
+  const prev = document.createElement("button"); prev.type = "button"; prev.textContent = "‹"; prev.setAttribute("aria-label","Ano anterior");
+  const yEl = document.createElement("span"); yEl.className = "mpick-year";
+  const next = document.createElement("button"); next.type = "button"; next.textContent = "›"; next.setAttribute("aria-label","Próximo ano");
+  top.append(prev, yEl, next);
+  const grid = document.createElement("div"); grid.className = "mpick-grid";
+  let ano = Number(value.slice(0,4));
+  function draw(){
+    yEl.textContent = ano; grid.innerHTML = "";
+    val.textContent = monthLabel(hidden.value);
+    const ck = curKey();
+    MES_CURTO.forEach((t,i) => {
+      const k = ano + "-" + pad(i+1);
+      const b = document.createElement("button"); b.type = "button"; b.textContent = t;
+      b.setAttribute("aria-label", monthLabel(k)); b.setAttribute("aria-pressed", k === hidden.value ? "true" : "false");
+      if (k === ck) b.className = "atual";
+      b.onclick = () => { hidden.value = k; draw(); };
+      grid.append(b);
+    });
+  }
+  prev.onclick = () => { ano--; draw(); };
+  next.onclick = () => { ano++; draw(); };
+  draw();
+  box.append(top, grid);
+  d.append(head, hidden, box);
+  return d;
+}
 function monthOptions(extra){
   const ck = curKey(), out = [];
   for (let i = -12; i <= 36; i++){ const k = addMonths(ck, i); out.push([k, monthLabel(k)]); }
@@ -1160,10 +1211,10 @@ function openConta(k, c){
     fields.push(info);
   }
 
-  const fInicio = fieldSelect("cInicio", "Começa em", monthOptions(), k, { full:true });
+  const fInicio = monthPicker("cInicio", "Começa em", k);
   const fN = field("cParcelas", "Total de parcelas", def?.parcelas || "", { type:"number", inputmode:"numeric", min:1, max:360, placeholder:"Ex.: 12" });
   const fAtual = field("cAtual", "Parcela de " + mesK, c?.parcela || 1, { type:"number", inputmode:"numeric", min:1, max:360 });
-  const fMes = fieldSelect("cMes", "Em qual mês", monthOptions(def?.inicio), def ? def.inicio : k, { full:true });
+  const fMes = monthPicker("cMes", "Em qual mês", def ? def.inicio : k);
   fields.push(fInicio, fN, fAtual, fMes);
 
   let fEscopo = null;
