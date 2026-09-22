@@ -35,7 +35,7 @@
     --primary:#FFFFFF; --on-primary:#000000;
     --hero:#1C1C1C; --on-hero:#FFFFFF; --hero-muted:#A6A6A6; --hero-line:#333333;
     --sign:#FFFFFF; --lane:#FFC043; --track:#2A2A2A; --fill:#FFFFFF;
-    --good:#3AC47D; --warn:#FF6B5E; --field:#1F1F1F;
+    --good:#3AC47D; --good-bg:#14603C; --warn:#FF6B5E; --field:#1F1F1F;
   }
 }
 :root[data-theme="dark"]{
@@ -43,7 +43,7 @@
   --primary:#FFFFFF; --on-primary:#000000;
   --hero:#1C1C1C; --on-hero:#FFFFFF; --hero-muted:#A6A6A6; --hero-line:#333333;
   --sign:#FFFFFF; --lane:#FFC043; --track:#2A2A2A; --fill:#FFFFFF;
-  --good:#3AC47D; --warn:#FF6B5E; --field:#1F1F1F;
+  --good:#3AC47D; --good-bg:#14603C; --warn:#FF6B5E; --field:#1F1F1F;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
@@ -322,6 +322,11 @@ dialog .actions .btn.danger{margin-left:auto}
 .fech-bar div{height:100%;background:var(--good);border-radius:999px}
 .hist-fech{margin:0 0 14px;font-size:.9rem;background:var(--surface-2);border-radius:10px;padding:10px 12px}
 
+.sign.juntando{background:var(--good-bg,#0E7A41)}
+.sign.juntando .sign-arrow,.sign.juntando .sign-sub,.sign.juntando .sign-split small{color:rgba(255,255,255,.85)}
+.sign.juntando hr{border-top-color:rgba(255,255,255,.3)}
+.road.juntando .fill{background:var(--good)}
+
 [hidden]{display:none!important}
 </style>
 
@@ -447,9 +452,9 @@ dialog .actions .btn.danger{margin-left:auto}
         <h2>Resumo do mês</h2>
         <div class="stats">
           <div class="stat"><small>Ganho líquido</small><b id="mGanho">R$ 0</b></div>
-          <div class="stat"><small>Falta para a meta</small><b id="mFalta">R$ 0</b></div>
+          <div class="stat"><small id="mFaltaL">Falta para a meta</small><b id="mFalta">R$ 0</b></div>
           <div class="stat"><small>Esta semana</small><b id="mSemana">R$ 0</b></div>
-          <div class="stat"><small>Meta da semana</small><b id="mSemanaMeta">R$ 0</b></div>
+          <div class="stat"><small id="mSemanaMetaL">Meta da semana</small><b id="mSemanaMeta">R$ 0</b></div>
           <div class="stat"><small>Média por dia rodado</small><b id="mMediaReal">R$ 0</b></div>
           <div class="stat"><small>Ganho por hora</small><b id="mHora">–</b></div>
         </div>
@@ -457,42 +462,9 @@ dialog .actions .btn.danger{margin-left:auto}
       </div>
     </div>
 
-    <div class="panel next-card" style="margin-top:16px" id="nextBox" hidden>
-      <div class="nb-head">
-        <span class="nb-check" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <div><h2 id="nbTitle"></h2><p class="note" id="nbSub"></p></div>
-      </div>
-      <div class="nb-saldo"><span id="nbLabel"></span><b id="nbValor"></b></div>
-      <div class="nb-dots" id="nbDots" role="img"></div>
-      <p class="nb-legend" id="nbLegend"></p>
-      <div class="nb-row" id="nbRow"><span>Contas de <span id="nbMes"></span>: <strong id="nbContas"></strong></span><span id="nbFalta"></span></div>
-      <div class="nb-plan" id="nbPlan">
-        <p class="nb-plan-title" id="nbPlanTitle"></p>
-        <div class="nb-opt" id="nbOptAgora"><div><strong>Começando hoje</strong><span id="nbAgoraSub"></span></div><b id="nbAgora"></b></div>
-        <div class="nb-opt"><div><strong id="nbDepoisLbl"></strong><span id="nbDepoisSub"></span></div><b id="nbDepois"></b></div>
-        <p class="nb-diff" id="nbDiff"></p>
-      </div>
-      <p class="nb-extra" id="nbTipos"></p>
-      <p class="nb-extra" id="nbPrimeiro"></p>
-      <button class="btn ghost" id="nbVer" type="button"></button>
-    </div>
-
-    <div class="panel" style="margin-top:16px" id="cxBox">
-      <div class="cx-head">
-        <h2>Caixinha das contas</h2>
-        <button class="btn ghost small" id="cxAjustar" type="button" hidden>Ajustar</button>
-      </div>
-      <div id="cxSetup" hidden>
-        <p class="note" style="margin-top:0">A caixinha acompanha o dinheiro guardado para as contas. Os ganhos entram, e as contas que você marca como pagas saem. Assim você sabe, a qualquer momento, quanto tem e quais vencimentos já estão cobertos.</p>
-        <div class="actions"><button class="btn primary" id="cxComecar" type="button">Começar caixinha</button></div>
-      </div>
-      <div id="cxInfo" hidden>
-        <b class="cx-saldo" id="cxSaldo"></b>
-        <p class="cx-sub" id="cxSub"></p>
-      </div>
-      <h3 class="cx-tl-title" id="tlTitle">Próximos vencimentos</h3>
-      <ul class="list tl" id="dueList"></ul>
-      <button class="btn linklike" id="tlMais" type="button" hidden></button>
+    <div class="panel" style="margin-top:16px" id="dueBox">
+      <h2 id="dueTitle">Contas a pagar</h2>
+      <ul class="list" id="dueList"></ul>
     </div>
   </section>
 
@@ -530,7 +502,6 @@ dialog .actions .btn.danger{margin-left:auto}
 
       <div class="panel">
         <h2>Como você trabalha</h2>
-        <div id="cicloBox" class="ciclo-box"></div>
         <label id="lblDias">Dias em que você roda</label>
         <div class="chips" id="dayPresets" role="group" aria-labelledby="lblDias"></div>
         <div class="daypicks" id="dayPicks"></div>
@@ -700,7 +671,8 @@ function normMes(d){
     cfg: d.cfg ? normCfg(d.cfg) : null,
     ganhos: Array.isArray(d.ganhos) ? d.ganhos : [],
     ajustes: d.ajustes && typeof d.ajustes === "object" ? d.ajustes : {},
-    pagas: d.pagas && typeof d.pagas === "object" ? d.pagas : {}
+    pagas: d.pagas && typeof d.pagas === "object" ? d.pagas : {},
+    quitado: d.quitado && typeof d.quitado.dia === "string" ? { dia: d.quitado.dia, ts: Number(d.quitado.ts) || 0 } : null
   };
 }
 // Mês registrado antes da nova organização: usa o retrato salvo, só leitura
@@ -742,11 +714,29 @@ function cfgDoMes(k){
 // Mês de trabalho k: quais contas ele paga (o próprio mês ou o seguinte)
 function mesView(k){
   const cfg = cfgDoMes(k), contas = contasDoMes(k);
-  const alvo = cfg.ciclo === "seguinte" ? addMonths(k, 1) : k;
+  const alvo = k;
   return { contas, cfg, ganhos: meses[k] ? meses[k].ganhos : [], virtual: !meses[k], alvo, contasAlvo: alvo === k ? contas : contasDoMes(alvo) };
 }
-const cicloSeguinte = () => perfil && perfil.cfg.ciclo === "seguinte";
+const cicloSeguinte = () => false;
 const alvoDe = k => cicloSeguinte() ? addMonths(k, 1) : k;
+
+// ================= Mês pago: ganhos seguintes vão para o próximo mês =================
+function quitadoInfo(k){
+  const md = meses[k];
+  if (!md || !md.quitado) return null;
+  const cs = contasDoMes(k);
+  if (!cs.length || cs.some(c => !c.paga)) return null;
+  return md.quitado;
+}
+// O ganho foi registrado depois de o mês ficar todo pago?
+const vaiProximo = (g, q) => !!q && (g.data > q.dia || (g.data === q.dia && (Number(g.criadoEm) || 0) > q.ts));
+function progresso(M){
+  const pm = addMonths(M, -1), qM = quitadoInfo(M), qP = quitadoInfo(pm);
+  let proprio = 0, adiantado = 0, saiu = 0;
+  (meses[M] ? meses[M].ganhos : []).forEach(g => { if (vaiProximo(g, qM)) saiu += liquido(g); else proprio += liquido(g); });
+  (meses[pm] ? meses[pm].ganhos : []).forEach(g => { if (vaiProximo(g, qP)) adiantado += liquido(g); });
+  return { total: proprio + adiantado, proprio, adiantado, saiu, qM };
+}
 
 // ================= Cálculos =================
 const somaContas = arr => arr.reduce((a,c)=>a+(Number(c.valor)||0),0);
@@ -903,298 +893,152 @@ function syncStatus(meta){
 // ================= Telas =================
 function renderHoje(){
   const now = new Date(), y = now.getFullYear(), m = now.getMonth(), today = now.getDate();
-  const md = mesView(mk(y,m));
-  const tKey = keyOf(now);
-  const meta = metaMensal(md);
-  const seg = md.alvo !== mk(y,m), alvoNome = monthShort(md.alvo);
-  const ganhoMes = md.ganhos.reduce((a,g)=>a+liquido(g),0);
-  const ganhoHoje = somaDia(tKey);
-  const restantes = workDaysFrom(md,y,m,today);
-  const faltaAntes = Math.max(0, meta - (ganhoMes - ganhoHoje));
-  const falta = Math.max(0, meta - ganhoMes);
+  const ck = mk(y,m), nk = addMonths(ck, 1), tKey = keyOf(now);
+  const md = mesView(ck), pr = progresso(ck), quitado = !!pr.qM;
+  const nomeC = monthShort(ck), nomeN = monthShort(nk);
+  const ganhosHoje = (meses[ck] ? meses[ck].ganhos : []).filter(g => g.data === tKey);
+
+  // Para onde vai o esforço agora: o mês atual, ou o próximo se o atual já está pago
+  let meta, prog, restantes, ganhoHoje, wTotal = 0, wPassed = 0;
+  if (!quitado){
+    meta = metaMensal(md); prog = pr.total;
+    restantes = workDaysFrom(md, y, m, today);
+    ganhoHoje = ganhosHoje.reduce((a,g) => a + liquido(g), 0);
+    wTotal = workDaysInMonth(md, y, m); wPassed = wTotal - workDaysFrom(md, y, m, today + 1);
+  } else {
+    const nmd = mesView(nk), [ny, nm] = nk.split("-").map(Number);
+    meta = metaMensal(nmd); prog = progresso(nk).total;
+    restantes = workDaysFrom(md, y, m, today) + workDaysInMonth(nmd, ny, nm - 1);
+    ganhoHoje = ganhosHoje.filter(g => vaiProximo(g, pr.qM)).reduce((a,g) => a + liquido(g), 0);
+  }
+  const falta = Math.max(0, meta - prog);
+  const faltaAntes = Math.max(0, meta - (prog - ganhoHoje));
   const mediaNec = restantes > 0 ? faltaAntes / restantes : faltaAntes;
 
   $("signDate").textContent = now.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"short"});
   $("sHoje").textContent = fmt(ganhoHoje);
   $("sMedia").textContent = fmt(mediaNec);
   $("sDias").textContent = restantes;
+  document.querySelector(".sign").classList.toggle("juntando", quitado);
+  $("road").classList.toggle("juntando", quitado);
 
+  const L = t => $("signLabel").textContent = t, B = t => $("signBig").textContent = t, S = t => $("signSub").textContent = t;
   if (meta <= 0){
-    $("signLabel").textContent = "Meta de hoje"; $("signBig").textContent = "R$ –";
-    $("signSub").textContent = seg ? "Cadastre as contas de " + alvoNome + " na aba Contas para calcular quanto precisa rodar."
-      : "Cadastre suas contas na aba Contas para calcular quanto precisa rodar.";
+    L(quitado ? cap(nomeC) + " está pago" : "Meta de hoje"); B("R$ –");
+    S(quitado ? "Cadastre as contas de " + nomeN + " na aba Contas para ver quanto juntar por dia."
+              : "Cadastre suas contas na aba Contas para calcular quanto precisa rodar.");
   } else if (falta <= 0){
-    $("signLabel").textContent = "Meta do mês"; $("signBig").textContent = "Batida";
-    $("signSub").textContent = (seg ? "Você já juntou tudo para as contas de " + alvoNome + "." : "Você já cobriu todas as contas do mês.") +
-      " O que ganhar daqui para frente é sobra: " + fmt(ganhoMes - meta) + " até agora.";
-  } else if (!isWorkDay(md,now) && ganhoHoje === 0){
-    $("signLabel").textContent = "Hoje é folga"; $("signBig").textContent = fmt(mediaNec);
-    $("signSub").textContent = "É a média que você precisa fazer em cada um dos próximos " + restantes + " dias de trabalho. Se rodar hoje, registre e ela diminui.";
+    L(quitado ? cap(nomeN) + " garantido" : "Meta do mês"); B("Batida");
+    S(quitado ? cap(nomeC) + " está pago e você já juntou tudo para as contas de " + nomeN + "."
+              : "Você já cobriu todas as contas do mês. O que ganhar daqui para frente é sobra: " + fmt(prog - meta) + " até agora.");
+  } else if (!isWorkDay(md, now) && ganhoHoje === 0){
+    L(quitado ? "Folga · juntando para " + nomeN : "Hoje é folga"); B(fmt(mediaNec));
+    S("É a média que você precisa fazer em cada um dos próximos " + restantes + " dias de trabalho" + (quitado ? " para pagar " + nomeN : "") + ". Se rodar hoje, registre e ela diminui.");
   } else {
     const faltaHoje = Math.max(0, mediaNec - ganhoHoje);
     if (faltaHoje <= 0){
-      $("signLabel").textContent = "Meta de hoje"; $("signBig").textContent = "Feita";
-      $("signSub").textContent = "Você passou a meta de hoje em " + fmt(ganhoHoje - mediaNec) + ". Cada real a mais baixa a média dos próximos dias.";
+      L(quitado ? "Hoje, para " + nomeN : "Meta de hoje"); B("Feita");
+      S("Você passou a meta de hoje em " + fmt(ganhoHoje - mediaNec) + ". Cada real a mais baixa a média dos próximos dias.");
     } else {
-      $("signLabel").textContent = ganhoHoje > 0 ? "Falta hoje" : "Meta de hoje";
-      $("signBig").textContent = fmt(faltaHoje);
-      $("signSub").textContent = ganhoHoje > 0 ? "Você já fez " + fmt(ganhoHoje) + " de " + fmt(mediaNec) + " hoje."
-        : seg ? "Líquido que você precisa fazer hoje para juntar " + fmt(meta) + " para as contas de " + alvoNome + "."
-              : "Líquido que você precisa fazer hoje para fechar o mês em " + fmt(meta) + ".";
+      L(quitado ? (ganhoHoje > 0 ? "Falta hoje, para " + nomeN : "Meta de hoje, para " + nomeN) : (ganhoHoje > 0 ? "Falta hoje" : "Meta de hoje"));
+      B(fmt(faltaHoje));
+      if (ganhoHoje > 0) S("Você já fez " + fmt(ganhoHoje) + " de " + fmt(mediaNec) + " hoje.");
+      else if (quitado) S(cap(nomeC) + " está pago. Tudo o que você ganhar agora vai para as contas de " + nomeN + ".");
+      else S("Líquido que você precisa fazer hoje para fechar o mês em " + fmt(meta) + "." + (pr.adiantado > 0.5 ? " Você começou o mês com " + fmt(pr.adiantado) + " adiantados de " + monthShort(addMonths(ck,-1)) + "." : ""));
     }
   }
 
-  const pct = meta > 0 ? Math.min(100, ganhoMes/meta*100) : 0;
-  const wTotal = workDaysInMonth(md,y,m);
-  const wPassed = wTotal - workDaysFrom(md,y,m,today+1);
-  const esperado = wTotal ? meta * wPassed / wTotal : 0;
-  $("roadTitle").textContent = seg ? cap(monthShort(mk(y,m))) + ", para as contas de " + alvoNome : "Progresso de " + monthShort(mk(y,m));
+  // Barra de progresso
+  const pct = meta > 0 ? Math.min(100, prog / meta * 100) : 0;
+  const esperado = !quitado && wTotal ? meta * wPassed / wTotal : 0;
+  $("roadTitle").textContent = quitado ? "Juntando para " + nomeN : "Progresso de " + nomeC;
   $("roadPct").textContent = Math.round(pct) + "% da meta";
   $("roadFill").style.width = pct + "%";
-  $("roadMarker").style.left = (meta > 0 ? Math.min(100, esperado/meta*100) : 0) + "%";
+  $("roadMarker").hidden = quitado;
+  $("roadMarker").style.left = (meta > 0 ? Math.min(100, esperado / meta * 100) : 0) + "%";
   $("road").setAttribute("aria-valuenow", Math.round(pct));
-  $("roadLeft").textContent = fmt(ganhoMes) + " ganhos";
-  $("roadExpected").textContent = "Esperado até hoje: " + fmt(esperado);
-  $("roadRight").textContent = "Meta " + fmt(meta);
+  $("roadLeft").textContent = quitado ? fmt(prog) + " adiantados"
+    : fmt(prog) + " ganhos" + (pr.adiantado > 0.5 ? " (" + fmt(pr.adiantado) + " de " + monthShort(addMonths(ck,-1)) + ")" : "");
+  $("roadExpected").textContent = quitado ? "Falta " + fmt(falta) : "Esperado até hoje: " + fmt(esperado);
+  $("roadRight").textContent = (quitado ? "Meta de " + nomeN + " " : "Meta ") + fmt(meta);
 
-  $("mGanho").textContent = fmt(ganhoMes);
-  $("mFalta").textContent = fmt(falta); $("mFalta").className = falta > 0 ? "" : "pos";
-  const dow = (now.getDay()+6)%7;
+  // Resumo do mês atual
+  const ganhoMesTodo = pr.proprio + pr.saiu;
+  $("mGanho").textContent = fmt(ganhoMesTodo);
+  $("mFaltaL").textContent = quitado ? "Adiantado para " + nomeN : "Falta para a meta";
+  $("mFalta").textContent = quitado ? fmt(pr.saiu) : fmt(falta);
+  $("mFalta").className = quitado || falta <= 0 ? "pos" : "";
+  const dow = (now.getDay() + 6) % 7;
   let semana = 0;
-  for (let i=0;i<7;i++) semana += somaDia(keyOf(new Date(y,m,today-dow+i)));
-  const mSem = metaSemanal(md,y,m);
+  for (let i = 0; i < 7; i++) semana += somaDia(keyOf(new Date(y, m, today - dow + i)));
+  const mSem = quitado ? mediaNec * md.cfg.dias.length : metaSemanal(md, y, m);
+  $("mSemanaMetaL").textContent = quitado ? "Meta da semana (" + nomeN + ")" : "Meta da semana";
   $("mSemana").textContent = fmt(semana); $("mSemana").className = mSem > 0 && semana >= mSem ? "pos" : "";
   $("mSemanaMeta").textContent = fmt(mSem);
-  const diasRodados = new Set(md.ganhos.map(g=>g.data)).size;
-  $("mMediaReal").textContent = diasRodados ? fmt(ganhoMes/diasRodados) : "R$ 0";
-  const comHoras = md.ganhos.filter(g=>Number(g.horas)>0);
-  const horas = comHoras.reduce((a,g)=>a+Number(g.horas),0);
-  $("mHora").textContent = horas > 0 ? fmt2(comHoras.reduce((a,g)=>a+liquido(g),0)/horas) : "–";
+  const todos = meses[ck] ? meses[ck].ganhos : [];
+  const diasRodados = new Set(todos.map(g => g.data)).size;
+  $("mMediaReal").textContent = diasRodados ? fmt(ganhoMesTodo / diasRodados) : "R$ 0";
+  const comHoras = todos.filter(g => Number(g.horas) > 0);
+  const horas = comHoras.reduce((a,g) => a + Number(g.horas), 0);
+  $("mHora").textContent = horas > 0 ? fmt2(comHoras.reduce((a,g) => a + liquido(g), 0) / horas) : "–";
   let note = "";
-  if (meta > 0 && falta > 0){
-    const diff = ganhoMes - esperado;
+  if (quitado) note = "Desde que " + nomeC + " ficou pago, tudo o que você registra vai para as contas de " + nomeN + ".";
+  else if (meta > 0 && falta > 0){
+    const diff = prog - esperado;
     note = diff >= 0 ? "Você está " + fmt(diff) + " à frente do ritmo necessário." : "Você está " + fmt(-diff) + " atrás do ritmo necessário.";
   }
   $("mNote").textContent = note;
 
-  const ck = mk(y,m);
-  const pend = md.contas.filter(c => !c.paga);
-  const tudoPago = md.contas.length > 0 && pend.length === 0;
-  $("nextBox").hidden = seg || !tudoPago;
-  if (!seg && tudoPago) renderProximo(ck, md, ganhoMes);
-  if (!seg){
-    const pk = addMonths(ck, -1);
-    if (meses[pk]){
-      const pmd = mesView(pk), saldoAnt = pmd.ganhos.reduce((a,g)=>a+liquido(g),0) - totalContas(pmd);
-      if (saldoAnt > 0.5 && pmd.contas.length) $("mNote").textContent = ($("mNote").textContent ? $("mNote").textContent + " " : "") +
-        "Você começou " + monthShort(ck) + " com " + fmt(saldoAnt) + " de saldo de " + monthShort(pk) + ".";
-    }
+  // Contas a pagar: do mês atual; se ele já está pago, as do próximo
+  const kLista = quitado ? nk : ck;
+  const pend = contasDoMes(kLista).filter(c => !c.paga).sort(ordemVenc);
+  $("dueTitle").textContent = quitado ? "Contas de " + nomeN : "Contas a pagar";
+  const ul = $("dueList"); ul.innerHTML = "";
+  $("dueBox").hidden = !quitado && md.contas.length === 0;
+  if (!pend.length){
+    const li = document.createElement("li"); li.className = "empty";
+    li.textContent = quitado ? "Nenhuma conta pendente em " + nomeN + " ainda." : "Todas as contas deste mês estão pagas.";
+    ul.append(li);
   }
-  renderCaixa();
+  pend.slice(0,5).forEach(c => ul.append(contaRow(c, kLista, false, { comMes: quitado })));
+  if (pend.length > 5){
+    const li = document.createElement("li"); li.className = "empty";
+    li.textContent = "Mais " + (pend.length - 5) + " na aba Contas.";
+    ul.append(li);
+  }
   renderFechamentoCard();
 }
 
 // ================= Fechamento do mês =================
 function fechamento(pk){
-  const md = mesView(pk);
-  const ganho = md.ganhos.reduce((a,g) => a + liquido(g), 0);
-  const contasAlvo = somaContas(md.contasAlvo), seg = md.alvo !== pk;
-  const dias = new Set(md.ganhos.map(g => g.data)).size;
-  const comH = md.ganhos.filter(g => Number(g.horas) > 0), horas = comH.reduce((a,g) => a + Number(g.horas), 0);
-  const nomeAlvo = monthShort(md.alvo);
+  const md = mesView(pk), pr = progresso(pk), contas = totalContas(md);
+  const nome = monthShort(pk), prox = monthShort(addMonths(pk, 1));
   let line;
-  if (contasAlvo <= 0) line = "Não havia contas cadastradas para " + nomeAlvo + ".";
-  else if (ganho >= contasAlvo) line = (seg ? "Isso cobre todas as contas de " + nomeAlvo : "Você cobriu todas as contas do mês") + " (" + fmt(contasAlvo) + ") e ainda sobraram " + fmt(ganho - contasAlvo) + ".";
-  else line = (seg ? "Isso cobre " : "Isso cobriu ") + Math.round(ganho / contasAlvo * 100) + "% das contas de " + nomeAlvo + " (" + fmt(contasAlvo) + "). " + (seg ? "Faltam " : "Faltaram ") + fmt(contasAlvo - ganho) + ".";
-  const stats = dias + (dias === 1 ? " dia rodado" : " dias rodados") + (dias ? " · média de " + fmt(ganho / dias) + " por dia" : "") + (horas > 0 ? " · " + fmt2(comH.reduce((a,g)=>a+liquido(g),0) / horas) + " por hora" : "");
-  return { kicker: cap(monthShort(pk)) + " fechou", title: (seg ? "Você juntou " : "Você ganhou ") + fmt(ganho), line, stats,
-           pct: contasAlvo > 0 ? Math.min(100, ganho / contasAlvo * 100) : 0 };
+  if (pr.qM) line = "Todas as contas de " + nome + " foram pagas" + (pr.saiu > 0.5 ? " e você adiantou " + fmt(pr.saiu) + " para " + prox + "." : ".");
+  else if (contas <= 0) line = "Não havia contas cadastradas para " + nome + ".";
+  else if (pr.total >= contas) line = "Seus ganhos cobriram as contas do mês (" + fmt(contas) + ").";
+  else line = "Faltaram " + fmt(contas - pr.total) + " para cobrir as contas do mês (" + fmt(contas) + ").";
+  const todos = meses[pk] ? meses[pk].ganhos : [];
+  const ganho = pr.proprio + pr.saiu, dias = new Set(todos.map(g => g.data)).size;
+  const comH = todos.filter(g => Number(g.horas) > 0), horas = comH.reduce((a,g) => a + Number(g.horas), 0);
+  const stats = dias + (dias === 1 ? " dia rodado" : " dias rodados") + (dias ? " · média de " + fmt(ganho / dias) + " por dia" : "") +
+    (horas > 0 ? " · " + fmt2(comH.reduce((a,g) => a + liquido(g), 0) / horas) + " por hora" : "");
+  return { kicker: cap(nome) + " fechou", title: "Você ganhou " + fmt(ganho), line, stats,
+           pct: pr.qM ? 100 : (contas > 0 ? Math.min(100, pr.total / contas * 100) : 0) };
 }
 function renderFechamentoCard(){
   const pk = addMonths(curKey(), -1);
   const show = !!(perfil.fechamentoDesde && pk >= perfil.fechamentoDesde && perfil.fechamentoVisto !== pk && meses[pk] && meses[pk].ganhos.length);
   $("fechBox").hidden = !show;
   if (!show) return;
-  const f = fechamento(pk), ci = caixaInfo();
+  const f = fechamento(pk);
   $("fechKicker").textContent = f.kicker;
   $("fechTitle").textContent = f.title;
   $("fechLine").textContent = f.line;
   $("fechFill").style.width = f.pct + "%";
-  $("fechStats").textContent = f.stats + "." + (ci ? " Sua caixinha está em " + fmt(ci.saldo) + "." : "");
+  $("fechStats").textContent = f.stats + ".";
   $("fechOk").onclick = () => { w(setDoc(perfilRef(), { fechamentoVisto: pk }, { merge:true })); };
   $("fechHist").onclick = () => { const [y,m] = pk.split("-").map(Number); histY = y; histM = m - 1; selectTab("historico"); window.scrollTo(0,0); };
-}
-
-// ================= Caixinha =================
-function caixaInfo(){
-  const cx = perfil && perfil.caixa;
-  if (!cx) return null;
-  const ini = cx.inicio;
-  let entrou = 0, saiu = 0;
-  Object.entries(meses).forEach(([k, md]) => {
-    md.ganhos.forEach(g => { if (g.data >= ini) entrou += liquido(g); });
-    const pg = md.pagas || {};
-    const ids = Object.keys(pg).filter(id => typeof pg[id] === "string" && pg[id] >= ini);
-    if (ids.length){ const cs = contasDoMes(k); ids.forEach(id => { const c = cs.find(x => x.id === id); if (c) saiu += c.valor; }); }
-  });
-  return { saldo: cx.saldoInicial + entrou - saiu, entrou, saiu, ini };
-}
-function definirCaixa(valor){
-  // Começa (ou ajusta) a caixinha para que o saldo mostrado seja exatamente "valor"
-  const ini = perfil.caixa ? perfil.caixa.inicio : keyOf(new Date());
-  const tmp = perfil.caixa; perfil.caixa = { inicio: ini, saldoInicial: 0 };
-  const base = caixaInfo().saldo; perfil.caixa = tmp;
-  w(setDoc(perfilRef(), { caixa: { inicio: ini, saldoInicial: Math.round((valor - base) * 100) / 100 } }, { merge:true }));
-}
-function abrirCaixaDialog(){
-  const ci = caixaInfo();
-  openDialog(ci ? "Ajustar caixinha" : "Começar caixinha", [
-    field("cxValor", ci ? "Quanto você tem na caixinha agora?" : "Quanto você tem guardado hoje para as contas?", ci ? numToInput(Math.round(ci.saldo*100)/100) : "", { full:true, inputmode:"decimal", placeholder:"R$ 0,00" }),
-    (() => { const d = document.createElement("p"); d.className = "full hint"; d.style.margin = "0";
-      d.textContent = ci ? "O app corrige o saldo para esse valor. Os próximos ganhos e pagamentos continuam sendo somados normalmente." : "Se não tiver nada guardado, deixe em branco. A partir de agora, os ganhos entram e as contas pagas saem."; return d; })()
-  ], () => {
-    const v = parseNum($("cxValor").value);
-    if (v < 0){ toast("Informe um valor igual ou maior que zero"); return false; }
-    definirCaixa(v); toast(ci ? "Caixinha ajustada" : "Caixinha começada");
-  });
-}
-
-function datasVenc(k, c){
-  const [y, m] = k.split("-").map(Number);
-  const dim = daysInMonth(y, m - 1);
-  return new Date(y, m - 1, Math.min(c.dia || dim, dim));
-}
-function diasTrabalhoAte(dataFim){
-  const cfg = perfil.cfg, d = new Date(); d.setHours(0,0,0,0);
-  let n = 0;
-  while (d <= dataFim){ if (cfg.dias.includes(d.getDay())) n++; d.setDate(d.getDate() + 1); }
-  return n;
-}
-let tlTudo = false;
-function renderCaixa(){
-  const ci = caixaInfo();
-  $("cxSetup").hidden = !!ci; $("cxInfo").hidden = !ci; $("cxAjustar").hidden = !ci;
-  if (ci){
-    $("cxSaldo").textContent = fmt(ci.saldo);
-    $("cxSaldo").className = "cx-saldo" + (ci.saldo < -0.5 ? " neg" : "");
-    const [iy, im, id] = ci.ini.split("-").map(Number);
-    $("cxSub").textContent = "Desde " + new Date(iy, im-1, id).toLocaleDateString("pt-BR",{day:"numeric",month:"short"}) +
-      ": entraram " + fmt(ci.entrou) + " em ganhos e saíram " + fmt(ci.saiu) + " em contas pagas.";
-  }
-
-  // Linha do tempo: contas não pagas do mês atual e do seguinte
-  const ck = curKey(), nk = addMonths(ck, 1);
-  const itens = [];
-  [ck, nk].forEach(k => contasDoMes(k).filter(c => !c.paga).forEach(c => itens.push({ c, k, data: datasVenc(k, c) })));
-  itens.sort((a,b) => a.data - b.data || b.c.valor - a.c.valor);
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
-  let resta = ci ? Math.max(0, ci.saldo) : 0, faltaAcum = 0;
-  const ul = $("dueList"); ul.innerHTML = "";
-  $("tlTitle").hidden = !ci && itens.length === 0;
-  if (!itens.length){
-    const li = document.createElement("li"); li.className = "empty";
-    li.textContent = "Nenhum vencimento pendente neste mês nem no próximo.";
-    ul.append(li);
-  }
-  const LIM = 6;
-  itens.forEach((it, i) => {
-    let extra = null;
-    if (ci){
-      extra = document.createElement("span");
-      if (resta >= it.c.valor - 0.005){
-        resta -= it.c.valor;
-        extra.className = "cob ok"; extra.textContent = "✓ Coberta pela caixinha";
-      } else {
-        faltaAcum += it.c.valor - resta; resta = 0;
-        const dias = it.data >= hoje ? diasTrabalhoAte(it.data) : 0;
-        extra.className = "cob falta";
-        const bf = document.createElement("b"); bf.textContent = "Faltam " + fmt(faltaAcum);
-        extra.append(bf);
-        if (dias > 0) extra.append(" até lá · " + fmt(faltaAcum / dias) + "/dia em " + dias + (dias === 1 ? " dia de trabalho" : " dias de trabalho"));
-        else extra.append(it.data < hoje ? " · já venceu" : " · vence hoje");
-      }
-    }
-    if (tlTudo || i < LIM) ul.append(contaRow(it.c, it.k, false, { comMes:true, extra }));
-  });
-  const mais = $("tlMais");
-  mais.hidden = itens.length <= LIM;
-  mais.textContent = tlTudo ? "Mostrar menos" : "Mostrar todos (" + itens.length + ")";
-}
-
-function renderProximo(ck, md, ganhoMes){
-  const nk = addMonths(ck, 1), nmd = mesView(nk);
-  const [ny, nm] = nk.split("-").map(Number);
-  const nome = monthShort(nk);
-  const saldo = Math.max(0, ganhoMes - totalContas(md));
-  const totN = totalContas(nmd), wd = workDaysInMonth(nmd, ny, nm - 1);
-
-  $("nbTitle").textContent = cap(monthShort(ck)) + " está pago";
-  $("nbSub").textContent = "O que você ganhar a partir de agora já conta para " + nome + ".";
-  $("nbLabel").textContent = "Saldo para " + nome;
-  $("nbValor").textContent = (saldo > 0.5 ? "+" : "") + fmt(saldo);
-  $("nbValor").className = saldo > 0.5 ? "pos" : "";
-  $("nbMes").textContent = nome;
-
-  const dots = $("nbDots"); dots.innerHTML = "";
-  if (totN > 0 && wd > 0){
-    const porDia = totN / wd;
-    const cob = Math.min(wd, Math.floor(saldo / porDia + 1e-9));
-    dots.style.setProperty("--cols", Math.ceil(wd / 2));
-    for (let i = 0; i < wd; i++){ const d = document.createElement("i"); if (i < cob) d.className = "on"; dots.append(d); }
-    dots.hidden = false;
-    dots.setAttribute("aria-label", cob + " de " + wd + " dias de trabalho de " + nome + " cobertos pelo saldo");
-    $("nbLegend").textContent = cob >= wd ? "Seu saldo já cobre todas as contas de " + nome + "."
-      : cob === 0 ? "Cada ponto é um dia de trabalho de " + nome + ", que custa cerca de " + fmt(porDia) + " em contas. Eles ficam verdes conforme seu saldo cresce."
-      : cob + " de " + wd + " dias de trabalho de " + nome + " já estão cobertos pelo seu saldo.";
-    $("nbRow").hidden = false;
-    $("nbContas").textContent = fmt(totN);
-    $("nbFalta").textContent = totN - saldo > 0.5 ? "Falta " + fmt(totN - saldo) : "Tudo coberto";
-    $("nbVer").textContent = "Ver contas de " + nome;
-
-    // Quanto fazer por dia
-    const falta = totN - saldo;
-    const hoje = new Date();
-    const [cy, cm] = ck.split("-").map(Number);
-    const restAtual = workDaysFrom(md, cy, cm - 1, hoje.getDate());
-    const plan = $("nbPlan");
-    if (falta > 0.5){
-      plan.hidden = false;
-      $("nbPlanTitle").textContent = "Quanto fazer por dia para pagar " + nome;
-      const diasAgora = restAtual + wd;
-      $("nbOptAgora").hidden = restAtual === 0;
-      $("nbAgora").innerHTML = ""; $("nbAgora").append(fmt(falta / diasAgora)); const sa = document.createElement("small"); sa.textContent = "/dia"; $("nbAgora").append(sa);
-      $("nbAgoraSub").textContent = diasAgora + " dias de trabalho até o fim de " + nome;
-      $("nbDepoisLbl").textContent = "Só em " + nome;
-      $("nbDepois").innerHTML = ""; $("nbDepois").append(fmt(falta / wd)); const sd = document.createElement("small"); sd.textContent = "/dia"; $("nbDepois").append(sd);
-      $("nbDepoisSub").textContent = wd + " dias de trabalho em " + nome;
-      const dif = falta / wd - falta / diasAgora;
-      $("nbDiff").textContent = restAtual > 0 && dif >= 1 ? "Começando hoje, você precisa de " + fmt(dif) + " a menos por dia." : "";
-      $("nbDiff").hidden = !$("nbDiff").textContent;
-    } else {
-      plan.hidden = true;
-    }
-
-    // Tipos de conta do próximo mês
-    const soma = t => nmd.contas.filter(c => c.tipo === t).reduce((a,c) => a + c.valor, 0);
-    const partes = [["mensal","Fixas"],["parcelada","Parcelas"],["unica","Únicas"]].map(([t,l]) => [l, soma(t)]).filter(x => x[1] > 0);
-    $("nbTipos").textContent = partes.length > 1 ? partes.map(([l,v]) => l + " " + fmt(v)).join(" · ") : "";
-    $("nbTipos").hidden = !$("nbTipos").textContent;
-
-    // Primeiro vencimento
-    const prox = nmd.contas.filter(c => !c.paga && c.dia).sort((a,b) => a.dia - b.dia)[0];
-    const pe = $("nbPrimeiro"); pe.innerHTML = "";
-    if (prox){
-      pe.append("Primeiro vencimento: ");
-      const st = document.createElement("strong"); st.textContent = prox.nome + " (" + fmt(prox.valor) + ")"; pe.append(st);
-      pe.append(", dia " + prox.dia + " de " + monthShort(nk) + ".");
-    }
-    pe.hidden = !prox;
-  } else {
-    $("nbPlan").hidden = true; $("nbTipos").hidden = true; $("nbPrimeiro").hidden = true;
-    dots.hidden = true; $("nbRow").hidden = true;
-    $("nbLegend").textContent = "Nenhuma conta programada para " + nome + " ainda.";
-    $("nbVer").textContent = "Adicionar contas de " + nome;
-  }
 }
 
 function ordemVenc(a,b){
@@ -1222,7 +1066,18 @@ function contaRow(c, k, editavel, opts={}){
   pay.setAttribute("aria-pressed", c.paga ? "true" : "false");
   pay.setAttribute("aria-label", c.paga ? "Desmarcar " + c.nome + " como paga" : "Marcar " + c.nome + " como paga");
   pay.innerHTML = '<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  pay.onclick = () => { setPaga(k, c.id, !c.paga); toast(c.paga ? c.nome + ": marcada como não paga" : c.nome + ": paga"); };
+  pay.onclick = () => {
+    setPaga(k, c.id, !c.paga);
+    const cs = contasDoMes(k);
+    const tudoPago = !c.paga && cs.every(x => x.id === c.id || x.paga);
+    if (tudoPago){
+      w(setDoc(mesRef(k), { quitado: { dia: keyOf(new Date()), ts: Date.now() } }, { merge:true }));
+      toast(cap(monthShort(k)) + " está pago! Agora o que você ganhar vai para " + monthShort(addMonths(k, 1)) + ".");
+    } else if (c.paga && meses[k] && meses[k].quitado){
+      w(setDoc(mesRef(k), { quitado: deleteField() }, { merge:true }));
+      toast(c.nome + ": marcada como não paga. Os ganhos voltam a contar para " + monthShort(k) + ".");
+    } else toast(c.paga ? c.nome + ": marcada como não paga" : c.nome + ": paga");
+  };
   const r = document.createElement(editavel ? "button" : "div"); r.className = "row";
   if (editavel){ r.type = "button"; r.onclick = () => openConta(k, c); r.setAttribute("aria-label", "Editar " + c.nome + ", " + fmt2(c.valor)); }
   const main = document.createElement("div"); main.className = "main";
@@ -1270,9 +1125,8 @@ function renderContas(){
   const [yy, mm] = k.split("-").map(Number), y = yy, m = mm - 1;
   const md = mesView(k), legado = isLegacyMonth(k);
   $("cMonth").textContent = monthLabel(k);
-  const alvoAtual = alvoDe(ck);
-  $("cHoje").hidden = k === alvoAtual;
-  $("cHoje").textContent = alvoAtual === ck ? "Voltar para o mês atual" : "Voltar para " + monthShort(alvoAtual);
+  $("cHoje").hidden = k === ck;
+  $("cHoje").textContent = "Voltar para o mês atual";
   $("legacyNote").hidden = !legado;
   $("addConta").hidden = legado;
 
@@ -1298,21 +1152,13 @@ function renderContas(){
   $("tMes").textContent = fmt(tp.meta);
   $("tSemana").textContent = fmt(tp.semana);
   $("tDia").textContent = fmt(tp.dia);
-  $("tNote").textContent = (cicloSeguinte() ? "Você junta esse valor trabalhando em " + monthShort(tp.w) + ": " : cap(monthShort(k)) + " tem ") +
-    tp.wd + " dias de trabalho (" + tp.cfg.dias.length + " por semana)" +
-    (tp.cfg.margem ? ", com " + tp.cfg.margem + "% de margem de segurança." : ".") + " Valores líquidos, depois dos gastos do dia.";
+  const adi = progresso(k).adiantado;
+  $("tNote").textContent = cap(monthShort(k)) + " tem " + tp.wd + " dias de trabalho (" + tp.cfg.dias.length + " por semana)" +
+    (tp.cfg.margem ? ", com " + tp.cfg.margem + "% de margem de segurança." : ".") + " Valores líquidos, depois dos gastos do dia." +
+    (adi > 0.5 ? " Você já adiantou " + fmt(adi) + " para este mês em " + monthShort(addMonths(k, -1)) + "." : "");
 
   // Como você trabalha (configuração atual)
   const cfg = perfil.cfg;
-  const cb = $("cicloBox");
-  if (!cb.childElementCount){
-    cb.append(segField("cfgCiclo", "O que você ganha em um mês paga", [["seguinte","As contas do mês seguinte"],["mesmo","As contas do mesmo mês"]], cfg.ciclo, v => {
-      salvarCfg({ ...perfil.cfg, ciclo: v });
-      contasK = v === "seguinte" ? addMonths(curKey(), 1) : curKey();
-      toast(v === "seguinte" ? "Agora cada mês junta para as contas do mês seguinte" : "Agora cada mês paga as próprias contas");
-    }));
-  }
-  cb.querySelectorAll('input[name="cfgCiclo"]').forEach(i => { i.checked = i.value === cfg.ciclo; });
   const dp = $("dayPicks");
   if (!dp.childElementCount){
     [1,2,3,4,5,6,0].forEach(d => {
@@ -1359,22 +1205,31 @@ function renderHist(){
   const y = histY, m = histM, k = mk(y,m), md = mesView(k);
   { const mn = monthName(y,m); $("histMonth").textContent = mn.charAt(0).toUpperCase() + mn.slice(1); }
   const total = md.ganhos.reduce((a,g)=>a+liquido(g),0);
-  const meta = metaMensal(md), res = total - meta;
+  const hp = progresso(k);
+  const meta = metaMensal(md), res = hp.total - meta;
   $("hGanho").textContent = fmt(total);
   $("hMeta").textContent = fmt(meta);
   $("hMetaL").textContent = md.alvo !== k ? "Meta (contas de " + monthShort(md.alvo) + ")" : "Meta";
-  if (k < curKey() && md.ganhos.length){ const f = fechamento(k); $("hFech").textContent = f.kicker + ": " + f.title.charAt(0).toLowerCase() + f.title.slice(1) + ". " + f.line; $("hFech").hidden = false; }
-  else $("hFech").hidden = true;
+  { const partes = [];
+    if (k < curKey() && md.ganhos.length){ const f = fechamento(k); partes.push(f.kicker + ": " + f.title.charAt(0).toLowerCase() + f.title.slice(1) + ". " + f.line); }
+    else if (hp.saiu > 0.5) partes.push("Você já adiantou " + fmt(hp.saiu) + " para " + monthShort(addMonths(k, 1)) + ".");
+    if (hp.adiantado > 0.5) partes.push("Recebeu " + fmt(hp.adiantado) + " adiantados de " + monthShort(addMonths(k, -1)) + ".");
+    $("hFech").textContent = partes.join(" "); $("hFech").hidden = !partes.length; }
   $("hRes").textContent = (res>=0?"+":"−") + fmt(Math.abs(res));
   $("hRes").className = res >= 0 ? "pos" : "neg";
   $("hHint").textContent = md.virtual && k < curKey()
     ? "Nenhum dado salvo neste mês. A meta mostrada usa as contas atuais."
-    : "Barras: ganho líquido por dia. Linha amarela: meta diária daquele mês.";
+    : "Barras: ganho líquido por dia. Linha amarela: meta diária daquele mês." + (hp.saiu > 0.5 ? " Barras cinza: ganhos que foram para " + monthShort(addMonths(k, 1)) + "." : "");
 
   const cw = $("chart").clientWidth;
   const n = daysInMonth(y,m), W = Math.round(cw > 0 ? cw : 720), H = W < 480 ? 180 : 220, pl = W < 480 ? 36 : 44, pr = 4, pt = 12, pb = 24;
   const lblEvery = W < 380 ? 7 : 5;
-  const vals = []; for(let i=1;i<=n;i++) vals.push(somaDia(k+"-"+pad(i)));
+  const vals = [], valsProx = [];
+  for (let i = 1; i <= n; i++){
+    const dk = k + "-" + pad(i), gs = (meses[k] ? meses[k].ganhos : []).filter(g => g.data === dk);
+    valsProx.push(gs.filter(g => vaiProximo(g, hp.qM)).reduce((a,g) => a + liquido(g), 0));
+    vals.push(gs.reduce((a,g) => a + liquido(g), 0));
+  }
   const mdb = metaDiariaBase(md,y,m);
   const max = Math.max(mdb*1.25, ...vals, 10);
   const bw = (W-pl-pr)/n;
@@ -1392,7 +1247,12 @@ function renderHist(){
     const x = pl + i*bw + bw*.15, wd = bw*.7, d = new Date(y,m,i+1);
     if (v !== 0){
       const yy = yOf(v);
-      svg += `<rect x="${x.toFixed(1)}" y="${yy.toFixed(1)}" width="${wd.toFixed(1)}" height="${Math.max(1,(H-pb)-yy).toFixed(1)}" rx="3" fill="${mdb && v>=mdb ? cGood : cBar}"><title>${d.toLocaleDateString("pt-BR")}: ${fmt2(v)}</title></rect>`;
+      const vp = valsProx[i];
+      if (vp > 0.005){
+        svg += `<rect x="${x.toFixed(1)}" y="${yy.toFixed(1)}" width="${wd.toFixed(1)}" height="${Math.max(1,(H-pb)-yy).toFixed(1)}" rx="3" fill="${cInk}"><title>${d.toLocaleDateString("pt-BR")}: ${fmt2(v)} (${fmt2(vp)} para ${monthShort(addMonths(k,1))})</title></rect>`;
+      } else {
+        svg += `<rect x="${x.toFixed(1)}" y="${yy.toFixed(1)}" width="${wd.toFixed(1)}" height="${Math.max(1,(H-pb)-yy).toFixed(1)}" rx="3" fill="${mdb && v>=mdb ? cGood : cBar}"><title>${d.toLocaleDateString("pt-BR")}: ${fmt2(v)}</title></rect>`;
+      }
     } else if (!isWorkDay(md,d)){
       svg += `<rect x="${x.toFixed(1)}" y="${H-pb-3}" width="${wd.toFixed(1)}" height="3" fill="${cLine}"/>`;
     }
@@ -1667,6 +1527,7 @@ function openGanho(g){
     if (!data){ toast("Escolha o dia"); return false; }
     if (valor <= 0){ toast("Informe um ganho maior que zero"); return false; }
     const novo = { id: g.id, data, valor, gastos: parseNum($("gGastos").value), horas: parseNum($("gHoras").value) };
+    if (g.criadoEm) novo.criadoEm = g.criadoEm;
     const newK = data.slice(0,7);
     const lista = clone(mesView(oldK).ganhos);
     if (newK === oldK){
@@ -1699,7 +1560,7 @@ $("quickForm").addEventListener("submit", e=>{
   const data = $("qData").value, valor = parseNum($("qValor").value);
   if (!data){ toast("Escolha o dia"); return; }
   if (valor <= 0){ toast("Informe um ganho maior que zero"); $("qValor").focus(); return; }
-  addGanho({ id: uidGen(), data, valor, gastos: parseNum($("qGastos").value), horas: parseNum($("qHoras").value) });
+  addGanho({ id: uidGen(), data, valor, gastos: parseNum($("qGastos").value), horas: parseNum($("qHoras").value), criadoEm: Date.now() });
   $("qValor").value = ""; $("qGastos").value = ""; $("qHoras").value = "";
   toast("Ganho salvo: " + fmt2(valor));
 });
@@ -1707,10 +1568,8 @@ $("addConta").onclick = ()=>openConta(contasK, null);
 $("cPrev").onclick = ()=>{ contasK = addMonths(contasK,-1); renderContas(); };
 $("cNext").onclick = ()=>{ contasK = addMonths(contasK, 1); renderContas(); };
 $("cHoje").onclick = ()=>{ contasK = alvoDe(curKey()); renderContas(); };
-$("cxComecar").onclick = abrirCaixaDialog;
-$("cxAjustar").onclick = abrirCaixaDialog;
-$("tlMais").onclick = ()=>{ tlTudo = !tlTudo; renderCaixa(); };
-$("nbVer").onclick = ()=>{ contasK = addMonths(curKey(), 1); selectTab("contas"); renderContas(); window.scrollTo(0,0); };
+
+
 $("cfgMargem").addEventListener("change", ()=>{
   let v = parseInt($("cfgMargem").value,10); if (!(v>=0)) v = 0; if (v>100) v = 100;
   salvarCfg({ ...perfil.cfg, margem: v });
