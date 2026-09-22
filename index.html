@@ -127,7 +127,11 @@ input:focus-visible{outline:none}
 .btn.ghost{background:var(--surface-2);color:var(--ink)}
 .btn.danger{background:transparent;color:var(--warn)}
 .btn.small{padding:7px 14px;min-height:36px;font-size:.85rem;border-radius:999px}
-.btn.google{width:100%;background:var(--surface-2);margin-top:12px}
+.btn.google{width:100%;margin-top:12px;gap:12px;background:#FFFFFF;color:#1F1F1F;border:1px solid #747775;font-weight:500}
+.btn.google:hover{background:#F2F2F2}
+.btn.google .g-logo{width:20px;height:20px;flex:0 0 auto}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.google{background:#131314;color:#E3E3E3;border-color:#8E918F}:root:not([data-theme="light"]) .btn.google:hover{background:#1E1F20}}
+:root[data-theme="dark"] .btn.google{background:#131314;color:#E3E3E3;border-color:#8E918F}
 .btn.linklike{background:none;color:var(--muted);text-decoration:underline;padding-left:4px;padding-right:4px}
 .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 #quickForm .btn.primary{width:100%}
@@ -379,7 +383,7 @@ dialog .actions .btn.danger{margin-left:auto}
     <div class="panel login">
       <h1>Entre para ver suas metas</h1>
       <p class="note" style="margin-top:0">Seus dados ficam salvos na nuvem, mês a mês, e aparecem em qualquer aparelho em que você entrar.</p>
-      <button class="btn google" id="btnGoogle" type="button">Entrar com Google</button>
+      <button class="btn google" id="btnGoogle" type="button"><img class="g-logo" src="google-g.svg" alt="" width="20" height="20" onerror="this.remove()"><span>Continuar com o Google</span></button>
       <div class="or">ou use e-mail e senha</div>
       <form id="emailForm" autocomplete="on">
         <div class="fields">
@@ -894,6 +898,8 @@ function syncStatus(meta){
 function renderHoje(){
   const now = new Date(), y = now.getFullYear(), m = now.getMonth(), today = now.getDate();
   const ck = mk(y,m), nk = addMonths(ck, 1), tKey = keyOf(now);
+  // Mês já todo pago (inclusive antes desta versão) mas sem registro da virada: registra agora
+  garantirVirada(ck);
   const md = mesView(ck), pr = progresso(ck), quitado = !!pr.qM;
   const nomeC = monthShort(ck), nomeN = monthShort(nk);
   const ganhosHoje = (meses[ck] ? meses[ck].ganhos : []).filter(g => g.data === tKey);
@@ -1007,6 +1013,15 @@ function renderHoje(){
     ul.append(li);
   }
   renderFechamentoCard();
+}
+
+function garantirVirada(k){
+  const md = meses[k], cs = contasDoMes(k);
+  if (!md || md.quitado || !cs.length || cs.some(c => !c.paga)) return true;
+  if (creating["q" + k]) return true;
+  creating["q" + k] = true;
+  w(setDoc(mesRef(k), { quitado: { dia: keyOf(new Date()), ts: Date.now() } }, { merge:true }));
+  return false;
 }
 
 // ================= Fechamento do mês =================
