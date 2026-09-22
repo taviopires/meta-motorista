@@ -284,7 +284,19 @@ dialog .actions .btn.danger{margin-left:auto}
 .nb-legend{font-size:.88rem;margin:0 0 14px;color:var(--ink)}
 .nb-row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.86rem;color:var(--muted);padding-top:12px;border-top:1px solid var(--line);margin-bottom:14px}
 .nb-row strong{color:var(--ink);font-weight:600}
-#nbVer{width:100%}
+#nbVer{width:100%;margin-top:6px}
+.nb-plan{background:var(--surface-2);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.nb-plan-title{margin:0 0 4px;font-size:.85rem;font-weight:600}
+.nb-opt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0}
+.nb-opt+.nb-opt{border-top:1px solid var(--line)}
+.nb-opt strong{display:block;font-size:.92rem;font-weight:600}
+.nb-opt span{display:block;font-size:.8rem;color:var(--muted)}
+.nb-opt b{font-family:var(--cond);font-size:1.3rem;font-weight:800;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.nb-opt b small{font-family:var(--font);font-size:.75rem;font-weight:500;color:var(--muted);letter-spacing:0}
+#nbOptAgora b{color:var(--good)}
+.nb-diff{margin:4px 0 0;font-size:.8rem;color:var(--muted)}
+.nb-extra{font-size:.83rem;color:var(--muted);margin:0 0 6px}
+.nb-extra strong{color:var(--ink);font-weight:600}
 @media (prefers-reduced-motion:reduce){.nb-dots i{transition:none}}
 
 [hidden]{display:none!important}
@@ -423,6 +435,14 @@ dialog .actions .btn.danger{margin-left:auto}
       <div class="nb-dots" id="nbDots" role="img"></div>
       <p class="nb-legend" id="nbLegend"></p>
       <div class="nb-row" id="nbRow"><span>Contas de <span id="nbMes"></span>: <strong id="nbContas"></strong></span><span id="nbFalta"></span></div>
+      <div class="nb-plan" id="nbPlan">
+        <p class="nb-plan-title" id="nbPlanTitle"></p>
+        <div class="nb-opt" id="nbOptAgora"><div><strong>Começando hoje</strong><span id="nbAgoraSub"></span></div><b id="nbAgora"></b></div>
+        <div class="nb-opt"><div><strong id="nbDepoisLbl"></strong><span id="nbDepoisSub"></span></div><b id="nbDepois"></b></div>
+        <p class="nb-diff" id="nbDiff"></p>
+      </div>
+      <p class="nb-extra" id="nbTipos"></p>
+      <p class="nb-extra" id="nbPrimeiro"></p>
       <button class="btn ghost" id="nbVer" type="button"></button>
     </div>
 
@@ -952,7 +972,47 @@ function renderProximo(ck, md, ganhoMes){
     $("nbContas").textContent = fmt(totN);
     $("nbFalta").textContent = totN - saldo > 0.5 ? "Falta " + fmt(totN - saldo) : "Tudo coberto";
     $("nbVer").textContent = "Ver contas de " + nome;
+
+    // Quanto fazer por dia
+    const falta = totN - saldo;
+    const hoje = new Date();
+    const [cy, cm] = ck.split("-").map(Number);
+    const restAtual = workDaysFrom(md, cy, cm - 1, hoje.getDate());
+    const plan = $("nbPlan");
+    if (falta > 0.5){
+      plan.hidden = false;
+      $("nbPlanTitle").textContent = "Quanto fazer por dia para pagar " + nome;
+      const diasAgora = restAtual + wd;
+      $("nbOptAgora").hidden = restAtual === 0;
+      $("nbAgora").innerHTML = ""; $("nbAgora").append(fmt(falta / diasAgora)); const sa = document.createElement("small"); sa.textContent = "/dia"; $("nbAgora").append(sa);
+      $("nbAgoraSub").textContent = diasAgora + " dias de trabalho até o fim de " + nome;
+      $("nbDepoisLbl").textContent = "Só em " + nome;
+      $("nbDepois").innerHTML = ""; $("nbDepois").append(fmt(falta / wd)); const sd = document.createElement("small"); sd.textContent = "/dia"; $("nbDepois").append(sd);
+      $("nbDepoisSub").textContent = wd + " dias de trabalho em " + nome;
+      const dif = falta / wd - falta / diasAgora;
+      $("nbDiff").textContent = restAtual > 0 && dif >= 1 ? "Começando hoje, você precisa de " + fmt(dif) + " a menos por dia." : "";
+      $("nbDiff").hidden = !$("nbDiff").textContent;
+    } else {
+      plan.hidden = true;
+    }
+
+    // Tipos de conta do próximo mês
+    const soma = t => nmd.contas.filter(c => c.tipo === t).reduce((a,c) => a + c.valor, 0);
+    const partes = [["mensal","Fixas"],["parcelada","Parcelas"],["unica","Únicas"]].map(([t,l]) => [l, soma(t)]).filter(x => x[1] > 0);
+    $("nbTipos").textContent = partes.length > 1 ? partes.map(([l,v]) => l + " " + fmt(v)).join(" · ") : "";
+    $("nbTipos").hidden = !$("nbTipos").textContent;
+
+    // Primeiro vencimento
+    const prox = nmd.contas.filter(c => !c.paga && c.dia).sort((a,b) => a.dia - b.dia)[0];
+    const pe = $("nbPrimeiro"); pe.innerHTML = "";
+    if (prox){
+      pe.append("Primeiro vencimento: ");
+      const st = document.createElement("strong"); st.textContent = prox.nome + " (" + fmt(prox.valor) + ")"; pe.append(st);
+      pe.append(", dia " + prox.dia + " de " + monthShort(nk) + ".");
+    }
+    pe.hidden = !prox;
   } else {
+    $("nbPlan").hidden = true; $("nbTipos").hidden = true; $("nbPrimeiro").hidden = true;
     dots.hidden = true; $("nbRow").hidden = true;
     $("nbLegend").textContent = "Nenhuma conta programada para " + nome + " ainda.";
     $("nbVer").textContent = "Adicionar contas de " + nome;
